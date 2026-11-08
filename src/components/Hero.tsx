@@ -22,15 +22,17 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate, searchQuery, onSearchCha
               <span aria-hidden="true">·</span>
               <span>Companies Act 71 of 2008</span>
               <span aria-hidden="true">·</span>
+              <span>MaruB Creations</span>
+              <span aria-hidden="true">·</span>
               <span>Updated 2025/2026</span>
             </div>
 
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-950 dark:text-white leading-[1.15]" style={{ textWrap: 'balance' }}>
-              South African Business Resource & Compliance Guide
+              Ispani Biz Hub: SA Business Resource Guide
             </h1>
 
             <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
-              An authoritative roadmap for startups and SMEs navigating CIPC BizPortal registration, SARS tax compliance, merged SEDFA initiatives, SETA learnerships, and competitive capital grants.
+              An authoritative platform by <strong>MaruB Creations</strong> empowering startups and SMEs to navigate CIPC BizPortal registration, SARS tax compliance, merged SEDFA initiatives, SETA learnerships, and capital grants.
             </p>
 
             {/* Live Search Bar */}

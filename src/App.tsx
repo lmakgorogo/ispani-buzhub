@@ -10,10 +10,15 @@ import { BusinessProfileGuideSection } from './components/BusinessProfileGuideSe
 import { ExternalResourceLinksSection } from './components/ExternalResourceLinksSection';
 import { FaqSection } from './components/FaqSection';
 import { BbeeAffidavitGenerator } from './components/BbeeAffidavitGenerator';
+import { AboutPage } from './components/AboutPage';
+import { ContactPage } from './components/ContactPage';
+import { PrivacyPolicyPage } from './components/PrivacyPolicyPage';
+import { AdSenseSlot } from './components/AdSenseSlot';
 import { Footer } from './components/Footer';
 import { ArrowUp } from 'lucide-react';
 
 export default function App() {
+  const [currentPage, setCurrentPage] = useState<'home' | 'about' | 'contact' | 'privacy'>('home');
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('theme');
@@ -41,8 +46,14 @@ export default function App() {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 400);
 
-      // Simple spy
-      const sections = ['overview', 'structures', 'cipc', 'tax', 'funding', 'audit', 'business-profile', 'external-links', 'faq', 'affidavit'];
+      if (currentPage !== 'home') return;
+
+      // Scroll spy on home page
+      const sections = [
+        'overview', 'structures', 'cipc', 'tax', 
+        'funding', 'audit', 'business-profile', 
+        'external-links', 'faq', 'affidavit'
+      ];
       for (const sectionId of sections) {
         const el = document.getElementById(sectionId);
         if (el) {
@@ -57,9 +68,25 @@ export default function App() {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [currentPage]);
 
-  const handleNavigate = (sectionId: string) => {
+  const handleNavigatePage = (page: 'home' | 'about' | 'contact' | 'privacy') => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNavigateSection = (sectionId: string) => {
+    if (currentPage !== 'home') {
+      setCurrentPage('home');
+      setTimeout(() => {
+        scrollToSection(sectionId);
+      }, 100);
+    } else {
+      scrollToSection(sectionId);
+    }
+  };
+
+  const scrollToSection = (sectionId: string) => {
     setActiveSection(sectionId);
     if (sectionId === 'overview') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -67,7 +94,7 @@ export default function App() {
     }
     const element = document.getElementById(sectionId);
     if (element) {
-      const topOffset = element.getBoundingClientRect().top + window.scrollY - 70;
+      const topOffset = element.getBoundingClientRect().top + window.scrollY - 110;
       window.scrollTo({ top: topOffset, behavior: 'smooth' });
     }
   };
@@ -82,50 +109,95 @@ export default function App() {
       <Header
         isDark={isDark}
         onToggleTheme={() => setIsDark(prev => !prev)}
+        currentPage={currentPage}
+        onNavigatePage={handleNavigatePage}
         activeSection={activeSection}
-        onNavigate={handleNavigate}
+        onNavigateSection={handleNavigateSection}
       />
 
       <main>
-        {/* Hero Section */}
-        <div id="overview">
-          <Hero
-            onNavigate={handleNavigate}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
+        {/* VIEW 1: HOME PAGE (The Complete Guide) */}
+        {currentPage === 'home' && (
+          <div>
+            {/* Hero Section */}
+            <div id="overview">
+              <Hero
+                onNavigate={handleNavigateSection}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+              />
+            </div>
+
+            {/* Top Leaderboard Ad Unit (Google AdSense) */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <AdSenseSlot slotId="1234567890" format="horizontal" />
+            </div>
+
+            {/* Section 1: Types of Business Structures */}
+            <BusinessStructuresSection />
+
+            {/* Section 2: CIPC Registration Process & Fee Calculator */}
+            <CipcProcessSection />
+
+            {/* Mid-Content Responsive Ad Unit */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <AdSenseSlot slotId="2345678901" format="auto" />
+            </div>
+
+            {/* Section 3: SARS and Tax Compliance + Multi-Calculator */}
+            <TaxComplianceSection />
+
+            {/* Section 4: Startup Grants, SEDFA & Incubators Directory */}
+            <FundingDirectorySection searchQuery={searchQuery} />
+
+            {/* Section 5: Government Funding & Tender Readiness Audit */}
+            <FundingReadinessAudit />
+
+            {/* Section 6: Creating a Professional Business Profile */}
+            <BusinessProfileGuideSection />
+
+            {/* Section 7: External Resource Links (Official SA Portals) */}
+            <ExternalResourceLinksSection />
+
+            {/* Section 8: Frequently Asked Questions (FAQ) */}
+            <FaqSection />
+
+            {/* Section 9: B-BBEE EME Compliance Guide & Template */}
+            <BbeeAffidavitGenerator />
+
+            {/* Bottom Responsive Ad Unit */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <AdSenseSlot slotId="3456789012" format="horizontal" />
+            </div>
+          </div>
+        )}
+
+        {/* VIEW 2: ABOUT US PAGE */}
+        {currentPage === 'about' && (
+          <AboutPage
+            onNavigateHome={() => handleNavigatePage('home')}
+            onNavigateContact={() => handleNavigatePage('contact')}
           />
-        </div>
+        )}
 
-        {/* Section 1: Types of Business Structures */}
-        <BusinessStructuresSection />
+        {/* VIEW 3: CONTACT PAGE */}
+        {currentPage === 'contact' && (
+          <ContactPage
+            onNavigateHome={() => handleNavigatePage('home')}
+          />
+        )}
 
-        {/* Section 2: CIPC Registration Process & Fee Calculator */}
-        <CipcProcessSection />
-
-        {/* Section 3: SARS and Tax Compliance + Multi-Calculator */}
-        <TaxComplianceSection />
-
-        {/* Section 4: Startup Grants, SEDFA & Incubators Directory */}
-        <FundingDirectorySection searchQuery={searchQuery} />
-
-        {/* Section 5: Government Funding & Tender Readiness Audit */}
-        <FundingReadinessAudit />
-
-        {/* Section 6: Creating a Professional Business Profile */}
-        <BusinessProfileGuideSection />
-
-        {/* Section 7: External Resource Links (Official SA Portals) */}
-        <ExternalResourceLinksSection />
-
-        {/* Section 8: Frequently Asked Questions (FAQ) */}
-        <FaqSection />
-
-        {/* Section 9: B-BBEE EME Compliance Guide & Template */}
-        <BbeeAffidavitGenerator />
+        {/* VIEW 4: PRIVACY POLICY PAGE (Google AdSense & POPIA Compliant) */}
+        {currentPage === 'privacy' && (
+          <PrivacyPolicyPage
+            onNavigateHome={() => handleNavigatePage('home')}
+            onNavigateContact={() => handleNavigatePage('contact')}
+          />
+        )}
       </main>
 
       {/* Footer */}
-      <Footer />
+      <Footer onNavigatePage={handleNavigatePage} />
 
       {/* Floating Scroll-to-Top Button */}
       {showScrollTop && (

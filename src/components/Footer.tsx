@@ -1,21 +1,54 @@
 import React from 'react';
 import { ExternalLink, Shield } from 'lucide-react';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onNavigatePage: (page: 'home' | 'about' | 'contact' | 'privacy') => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onNavigatePage }) => {
   return (
     <footer className="bg-slate-900 text-slate-400 text-xs py-12 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-2 space-y-3">
             <div className="flex items-center gap-2 text-white font-bold text-sm">
-              <div className="w-6 h-6 rounded bg-emerald-600 flex items-center justify-center text-xs">
-                ZA
+              <div className="w-6 h-6 rounded bg-emerald-600 flex items-center justify-center text-xs font-extrabold">
+                IB
               </div>
-              <span>South African Business Resource & Compliance Guide</span>
+              <span>Ispani Biz Hub · MaruB Creations</span>
             </div>
             <p className="text-slate-400 max-w-md leading-relaxed text-xs">
-              Synthesizing legal frameworks from the Companies Act 71 of 2008, the Tax Administration Act, SEDFA small enterprise initiatives, and B-BBEE Codes of Good Practice for South African entrepreneurs.
+              Empowering South African entrepreneurs, emerging startups, and established SMEs with direct statutory roadmaps across CIPC BizPortal registration, SARS tax compliance, merged SEDFA initiatives, and government capital grants.
             </p>
+            <div className="pt-2 flex flex-wrap items-center gap-4 text-xs">
+              <button
+                onClick={() => { onNavigatePage('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                className="text-slate-300 hover:text-white transition-colors"
+              >
+                Home
+              </button>
+              <span className="text-slate-700">·</span>
+              <button
+                onClick={() => { onNavigatePage('about'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                className="text-slate-300 hover:text-white transition-colors"
+              >
+                About Us
+              </button>
+              <span className="text-slate-700">·</span>
+              <button
+                onClick={() => { onNavigatePage('contact'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                className="text-slate-300 hover:text-white transition-colors"
+              >
+                Contact
+              </button>
+              <span className="text-slate-700">·</span>
+              <button
+                onClick={() => { onNavigatePage('privacy'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                className="text-slate-300 hover:text-white transition-colors"
+              >
+                Privacy Policy
+              </button>
+            </div>
           </div>
 
           <div>
@@ -110,10 +143,10 @@ export const Footer: React.FC = () => {
 
         <div className="pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
           <div>
-            © {new Date().getFullYear()} South African Business Resource Guide. Non-governmental informational service.
+            &copy; 2026 MaruB Creations. All rights reserved. Ispani Biz Hub is an informational educational resource.
           </div>
           <div className="text-center sm:text-right max-w-md">
-            Disclaimer: This resource is intended for educational and guidance purposes. Always verify statutory obligations with CIPC, SARS, or a registered Chartered Accountant.
+            Disclaimer: This platform provides regulatory roadmaps and educational guidance. Always verify official statutory requirements directly with CIPC, SARS, or a registered Chartered Accountant.
           </div>
         </div>
       </div>
