@@ -1,6 +1,6 @@
 {
   "name": "SA Business Resource Guide",
-  "description": "Comprehensive interactive guide and compliance navigator for South African entrepreneurs, CIPC registration, SARS tax compliance, SEDFA/NYDA grants, and funding readiness.",
+  "description": "Ispani Biz Hub: Comprehensive interactive guide and compliance navigator for South African entrepreneurs, CIPC registration, SARS tax compliance, SEDFA/NYDA grants, and funding readiness by MaruB Creations.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

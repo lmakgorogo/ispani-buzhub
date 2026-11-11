@@ -38,7 +38,7 @@ export const FundingDirectorySection: React.FC<FundingDirectorySectionProps> = (
     <section id="funding" className="py-12 lg:py-16 bg-slate-50/70 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+        <div className="space-y-4 mb-8">
           <div>
             <div className="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-1">
               Government Grants & Incubators · DSBD / dtic / DSI
@@ -46,18 +46,18 @@ export const FundingDirectorySection: React.FC<FundingDirectorySectionProps> = (
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
               Startup Grants, Capital & Incubator Cohorts
             </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-2xl">
+            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-3xl leading-relaxed">
               South Africa offers substantial public-sector support for early-stage and high-impact ventures, spanning non-repayable grants, blended finance, and corporate B-BBEE learnerships.
             </p>
           </div>
 
-          {/* Category Filter Buttons (Functional Segmented Control) */}
-          <div className="flex items-center gap-1 p-1 bg-slate-200/80 dark:bg-slate-800 rounded-lg self-start md:self-auto overflow-x-auto text-xs font-medium">
+          {/* Category Filter Buttons (Clean flex-wrap, zero scrollbar) */}
+          <div className="flex flex-wrap items-center gap-1.5 p-1.5 bg-slate-200/80 dark:bg-slate-800 rounded-xl text-xs font-medium no-scrollbar max-w-fit">
             <button
               onClick={() => setCategoryFilter('All')}
-              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
+              className={`px-3.5 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
                 categoryFilter === 'All'
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -65,9 +65,9 @@ export const FundingDirectorySection: React.FC<FundingDirectorySectionProps> = (
             </button>
             <button
               onClick={() => setCategoryFilter('Youth')}
-              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
+              className={`px-3.5 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
                 categoryFilter === 'Youth'
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -75,9 +75,9 @@ export const FundingDirectorySection: React.FC<FundingDirectorySectionProps> = (
             </button>
             <button
               onClick={() => setCategoryFilter('Tech')}
-              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
+              className={`px-3.5 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
                 categoryFilter === 'Tech'
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -85,9 +85,9 @@ export const FundingDirectorySection: React.FC<FundingDirectorySectionProps> = (
             </button>
             <button
               onClick={() => setCategoryFilter('Cost-Sharing')}
-              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
+              className={`px-3.5 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
                 categoryFilter === 'Cost-Sharing'
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -95,9 +95,9 @@ export const FundingDirectorySection: React.FC<FundingDirectorySectionProps> = (
             </button>
             <button
               onClick={() => setCategoryFilter('Learnership')}
-              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
+              className={`px-3.5 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
                 categoryFilter === 'Learnership'
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-semibold'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >

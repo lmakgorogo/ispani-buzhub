@@ -7,18 +7,19 @@ import { TaxComplianceSection } from './components/TaxComplianceSection';
 import { FundingDirectorySection } from './components/FundingDirectorySection';
 import { FundingReadinessAudit } from './components/FundingReadinessAudit';
 import { BusinessProfileGuideSection } from './components/BusinessProfileGuideSection';
+import { SampleBusinessPlanSection } from './components/SampleBusinessPlanSection';
 import { ExternalResourceLinksSection } from './components/ExternalResourceLinksSection';
 import { FaqSection } from './components/FaqSection';
 import { BbeeAffidavitGenerator } from './components/BbeeAffidavitGenerator';
-import { AboutPage } from './components/AboutPage';
-import { ContactPage } from './components/ContactPage';
 import { PrivacyPolicyPage } from './components/PrivacyPolicyPage';
-import { AdSenseSlot } from './components/AdSenseSlot';
 import { Footer } from './components/Footer';
 import { ArrowUp } from 'lucide-react';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<'home' | 'about' | 'contact' | 'privacy'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'privacy'>('home');
+  const [activeSection, setActiveSection] = useState('structures');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('theme');
@@ -28,37 +29,42 @@ export default function App() {
     return false;
   });
 
-  const [activeSection, setActiveSection] = useState('overview');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showScrollTop, setShowScrollTop] = useState(false);
-
   useEffect(() => {
+    const root = document.documentElement;
     if (isDark) {
-      document.documentElement.classList.add('dark');
+      root.classList.add('dark');
       localStorage.setItem('theme', 'dark');
     } else {
-      document.documentElement.classList.remove('dark');
+      root.classList.remove('dark');
       localStorage.setItem('theme', 'light');
     }
   }, [isDark]);
 
   useEffect(() => {
     const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 400);
+      setShowScrollTop(window.scrollY > 350);
 
       if (currentPage !== 'home') return;
 
-      // Scroll spy on home page
       const sections = [
-        'overview', 'structures', 'cipc', 'tax', 
-        'funding', 'audit', 'business-profile', 
-        'external-links', 'faq', 'affidavit'
+        'overview',
+        'structures',
+        'cipc',
+        'tax',
+        'funding',
+        'audit',
+        'business-profile',
+        'business-plan',
+        'external-links',
+        'faq',
+        'affidavit'
       ];
+
       for (const sectionId of sections) {
         const el = document.getElementById(sectionId);
         if (el) {
           const rect = el.getBoundingClientRect();
-          if (rect.top <= 120 && rect.bottom >= 120) {
+          if (rect.top <= 140 && rect.bottom >= 140) {
             setActiveSection(sectionId);
             break;
           }
@@ -70,7 +76,11 @@ export default function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [currentPage]);
 
-  const handleNavigatePage = (page: 'home' | 'about' | 'contact' | 'privacy') => {
+  const toggleTheme = () => {
+    setIsDark(prev => !prev);
+  };
+
+  const handleNavigatePage = (page: 'home' | 'privacy') => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -94,7 +104,7 @@ export default function App() {
     }
     const element = document.getElementById(sectionId);
     if (element) {
-      const topOffset = element.getBoundingClientRect().top + window.scrollY - 110;
+      const topOffset = element.getBoundingClientRect().top + window.scrollY - 100;
       window.scrollTo({ top: topOffset, behavior: 'smooth' });
     }
   };
@@ -105,10 +115,10 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-500 selection:text-white transition-colors">
-      {/* Top Bar Navigation */}
+      {/* Sticky Top Navigation Bar with Jump Links, Active Highlight & Theme Switcher */}
       <Header
         isDark={isDark}
-        onToggleTheme={() => setIsDark(prev => !prev)}
+        onToggleTheme={toggleTheme}
         currentPage={currentPage}
         onNavigatePage={handleNavigatePage}
         activeSection={activeSection}
@@ -116,10 +126,10 @@ export default function App() {
       />
 
       <main>
-        {/* VIEW 1: HOME PAGE (The Complete Guide) */}
+        {/* VIEW 1: HOME PAGE (All Comprehensive Sections & Tools) */}
         {currentPage === 'home' && (
           <div>
-            {/* Hero Section */}
+            {/* Overview & Live Search */}
             <div id="overview">
               <Hero
                 onNavigate={handleNavigateSection}
@@ -128,85 +138,57 @@ export default function App() {
               />
             </div>
 
-            {/* Top Leaderboard Ad Unit (Google AdSense) */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <AdSenseSlot slotId="1234567890" format="horizontal" />
-            </div>
-
-            {/* Section 1: Types of Business Structures */}
+            {/* Section 01: Business Structures & Comparative Matrix */}
             <BusinessStructuresSection />
 
-            {/* Section 2: CIPC Registration Process & Fee Calculator */}
+            {/* Section 02: CIPC 15-Minute BizPortal Step-by-Step & Fee Calculator */}
             <CipcProcessSection />
 
-            {/* Mid-Content Responsive Ad Unit */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <AdSenseSlot slotId="2345678901" format="auto" />
-            </div>
-
-            {/* Section 3: SARS and Tax Compliance + Multi-Calculator */}
+            {/* Section 03: SARS Tax Compliance, SBC 12E & Multi-Tax Calculator */}
             <TaxComplianceSection />
 
-            {/* Section 4: Startup Grants, SEDFA & Incubators Directory */}
+            {/* Section 04: Funding Directory (NYDA, SEDFA, SETA, Tech Grants) */}
             <FundingDirectorySection searchQuery={searchQuery} />
 
-            {/* Section 5: Government Funding & Tender Readiness Audit */}
+            {/* Section 05: 60-Second Funding & Tender Readiness Audit */}
             <FundingReadinessAudit />
 
-            {/* Section 6: Creating a Professional Business Profile */}
+            {/* Section 06: South African Business Profile Blueprint */}
             <BusinessProfileGuideSection />
 
-            {/* Section 7: External Resource Links (Official SA Portals) */}
+            {/* Section 07: Sample Business Plan with 3-Year Audited Financials */}
+            <SampleBusinessPlanSection />
+
+            {/* Section 08: Verified Government & Statutory External Links */}
             <ExternalResourceLinksSection />
 
-            {/* Section 8: Frequently Asked Questions (FAQ) */}
-            <FaqSection />
+            {/* Section 09: Frequently Asked Questions & Accordions */}
+            <FaqSection onNavigateSection={handleNavigateSection} />
 
-            {/* Section 9: B-BBEE EME Compliance Guide & Template */}
+            {/* Section 10: B-BBEE Level Calculator & Sworn Affidavit Generator */}
             <BbeeAffidavitGenerator />
-
-            {/* Bottom Responsive Ad Unit */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <AdSenseSlot slotId="3456789012" format="horizontal" />
-            </div>
           </div>
         )}
 
-        {/* VIEW 2: ABOUT US PAGE */}
-        {currentPage === 'about' && (
-          <AboutPage
-            onNavigateHome={() => handleNavigatePage('home')}
-            onNavigateContact={() => handleNavigatePage('contact')}
-          />
-        )}
-
-        {/* VIEW 3: CONTACT PAGE */}
-        {currentPage === 'contact' && (
-          <ContactPage
-            onNavigateHome={() => handleNavigatePage('home')}
-          />
-        )}
-
-        {/* VIEW 4: PRIVACY POLICY PAGE (Google AdSense & POPIA Compliant) */}
+        {/* VIEW 2: PRIVACY POLICY PAGE (POPIA Compliant) */}
         {currentPage === 'privacy' && (
           <PrivacyPolicyPage
             onNavigateHome={() => handleNavigatePage('home')}
-            onNavigateContact={() => handleNavigatePage('contact')}
           />
         )}
       </main>
 
-      {/* Footer */}
+      {/* Footer with statutory links and "Powered by MaruB Creations" */}
       <Footer onNavigatePage={handleNavigatePage} />
 
-      {/* Floating Scroll-to-Top Button */}
+      {/* Floating Back to Top Button */}
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          aria-label="Scroll to top"
-          className="fixed bottom-6 right-6 z-40 p-3 bg-slate-900 dark:bg-emerald-600 text-white rounded-full shadow-lg hover:bg-slate-800 dark:hover:bg-emerald-500 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-400"
+          aria-label="Back to Top"
+          className="fixed bottom-6 right-6 z-40 p-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-lg transition-all duration-200 active:scale-95 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500 flex items-center justify-center border border-white/20"
         >
-          <ArrowUp className="w-4 h-4" />
+          <ArrowUp className="w-5 h-5 stroke-[2.5]" />
         </button>
       )}
     </div>

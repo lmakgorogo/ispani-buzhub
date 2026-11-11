@@ -220,12 +220,12 @@ export const ExternalResourceLinksSection: React.FC = () => {
         {/* Filter Controls: Category Tabs & Search Bar */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-8">
           {/* Category Tabs (Segmented control) */}
-          <div className="flex items-center gap-1 p-1 bg-slate-200/80 dark:bg-slate-800 rounded-lg overflow-x-auto text-xs font-medium">
+          <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-200/80 dark:bg-slate-800 rounded-xl text-xs font-medium no-scrollbar max-w-fit">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
+                className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
                   selectedCategory === cat
                     ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
