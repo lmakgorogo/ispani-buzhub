@@ -127,23 +127,19 @@ export const FaqSection: React.FC<FaqSectionProps> = ({ onNavigateSection }) => 
               Access the pre-calculated 3-year P&L, 12-month cash flow schedule, and Capex model tailored for South African commercial banks and SEDFA.
             </p>
           </div>
-          <button
-            onClick={() => {
+          <a
+            href="#toolkits"
+            onClick={(e) => {
               if (onNavigateSection) {
-                onNavigateSection('business-plan');
-              } else {
-                const target = document.getElementById('business-plan');
-                if (target) {
-                  const topOffset = target.getBoundingClientRect().top + window.scrollY - 100;
-                  window.scrollTo({ top: topOffset, behavior: 'smooth' });
-                }
+                e.preventDefault();
+                onNavigateSection('toolkits');
               }
             }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors shrink-0 cursor-pointer"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#D4AF37] hover:bg-[#e3be42] text-[#0F172A] text-xs font-extrabold rounded-xl shadow-xs transition-colors shrink-0 cursor-pointer no-print"
           >
             <FileText className="w-4 h-4" />
-            <span>Open Business Plan</span>
-          </button>
+            <span>Open Business Plan &amp; Templates</span>
+          </a>
         </div>
 
       </div>

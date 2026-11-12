@@ -46,19 +46,19 @@ code, kbd, samp, pre, .font-mono {
   }
 
   /* Specific section isolation when triggered via Print / Save Section PDF */
-  body.print-section-business-plan main > *:not(#business-plan) {
+  body.print-section-business-plan section:not(#business-plan) {
     display: none !important;
   }
 
-  body.print-section-business-profile main > *:not(#business-profile) {
+  body.print-section-business-profile section:not(#business-profile) {
     display: none !important;
   }
 
-  body.print-section-audit main > *:not(#audit) {
+  body.print-section-audit section:not(#audit) {
     display: none !important;
   }
 
-  body.print-section-affidavit main > *:not(#affidavit) {
+  body.print-section-affidavit section:not(#affidavit) {
     display: none !important;
   }
 
