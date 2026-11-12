@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { CurrencyProvider } from './context/CurrencyContext';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { BusinessStructuresSection } from './components/BusinessStructuresSection';
@@ -20,6 +21,7 @@ export default function App() {
   const [activeSection, setActiveSection] = useState('structures');
   const [searchQuery, setSearchQuery] = useState('');
   const [showScrollTop, setShowScrollTop] = useState(false);
+
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('theme');
@@ -114,83 +116,90 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-500 selection:text-white transition-colors">
-      {/* Sticky Top Navigation Bar with Jump Links, Active Highlight & Theme Switcher */}
-      <Header
-        isDark={isDark}
-        onToggleTheme={toggleTheme}
-        currentPage={currentPage}
-        onNavigatePage={handleNavigatePage}
-        activeSection={activeSection}
-        onNavigateSection={handleNavigateSection}
-      />
+    <CurrencyProvider>
+      <div className="min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-500 selection:text-white transition-colors">
+        
+        {/* Sticky Top Navigation Bar with Breadcrumbs & Print */}
+        <Header
+          isDark={isDark}
+          onToggleTheme={toggleTheme}
+          currentPage={currentPage}
+          onNavigatePage={handleNavigatePage}
+          activeSection={activeSection}
+          onNavigateSection={handleNavigateSection}
+        />
 
-      <main>
-        {/* VIEW 1: HOME PAGE (All Comprehensive Sections & Tools) */}
-        {currentPage === 'home' && (
-          <div>
-            {/* Overview & Live Search */}
-            <div id="overview">
-              <Hero
-                onNavigate={handleNavigateSection}
+        <main>
+          {/* VIEW 1: HOME PAGE */}
+          {currentPage === 'home' && (
+            <div>
+              {/* Overview & Live Search */}
+              <div id="overview">
+                <Hero
+                  onNavigate={handleNavigateSection}
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                />
+              </div>
+
+              {/* Section 01: Business Structures & 3 Filter Tabs */}
+              <BusinessStructuresSection />
+
+              {/* Section 02: CIPC 6-Step Horizontal Stepper with Direct Official Gateway */}
+              <CipcProcessSection />
+
+              {/* Section 03: SARS Tax Obligations & 8 Industry Licences */}
+              <TaxComplianceSection />
+
+              {/* Section 04: Funding Directory with 3-Second Scan */}
+              <FundingDirectorySection 
                 searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
               />
+
+              {/* Section 05: 60-Second Funding & Tender Readiness Audit */}
+              <FundingReadinessAudit />
+
+              {/* Section 06: Company Profile Blueprint (Accordion Chapters) */}
+              <BusinessProfileGuideSection />
+
+              {/* Section 07: Sample Business Plan & 3-Year Audited Financials (Accordion Chapters) */}
+              <SampleBusinessPlanSection />
+
+              {/* Section 08: Verified Government & Statutory External Links */}
+              <ExternalResourceLinksSection />
+
+              {/* Section 09: Frequently Asked Questions & Accordions */}
+              <FaqSection onNavigateSection={handleNavigateSection} />
+
+              {/* Section 10: B-BBEE Level Calculator & Sworn Affidavit Generator */}
+              <BbeeAffidavitGenerator />
             </div>
+          )}
 
-            {/* Section 01: Business Structures & Comparative Matrix */}
-            <BusinessStructuresSection />
+          {/* VIEW 2: PRIVACY POLICY PAGE (POPIA Compliant) */}
+          {currentPage === 'privacy' && (
+            <PrivacyPolicyPage
+              onNavigateHome={() => handleNavigatePage('home')}
+            />
+          )}
+        </main>
 
-            {/* Section 02: CIPC 15-Minute BizPortal Step-by-Step & Fee Calculator */}
-            <CipcProcessSection />
+        {/* Footer */}
+        <Footer onNavigatePage={handleNavigatePage} />
 
-            {/* Section 03: SARS Tax Compliance, SBC 12E & Multi-Tax Calculator */}
-            <TaxComplianceSection />
-
-            {/* Section 04: Funding Directory (NYDA, SEDFA, SETA, Tech Grants) */}
-            <FundingDirectorySection searchQuery={searchQuery} />
-
-            {/* Section 05: 60-Second Funding & Tender Readiness Audit */}
-            <FundingReadinessAudit />
-
-            {/* Section 06: South African Business Profile Blueprint */}
-            <BusinessProfileGuideSection />
-
-            {/* Section 07: Sample Business Plan with 3-Year Audited Financials */}
-            <SampleBusinessPlanSection />
-
-            {/* Section 08: Verified Government & Statutory External Links */}
-            <ExternalResourceLinksSection />
-
-            {/* Section 09: Frequently Asked Questions & Accordions */}
-            <FaqSection onNavigateSection={handleNavigateSection} />
-
-            {/* Section 10: B-BBEE Level Calculator & Sworn Affidavit Generator */}
-            <BbeeAffidavitGenerator />
-          </div>
+        {/* Floating Back to Top Button (Right corner) */}
+        {showScrollTop && (
+          <button
+            onClick={scrollToTop}
+            aria-label="Back to Top"
+            className="fixed bottom-6 right-6 z-40 p-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-lg transition-all duration-200 active:scale-95 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500 flex items-center justify-center border border-white/20"
+          >
+            <ArrowUp className="w-5 h-5 stroke-[2.5]" />
+          </button>
         )}
 
-        {/* VIEW 2: PRIVACY POLICY PAGE (POPIA Compliant) */}
-        {currentPage === 'privacy' && (
-          <PrivacyPolicyPage
-            onNavigateHome={() => handleNavigatePage('home')}
-          />
-        )}
-      </main>
 
-      {/* Footer with statutory links and "Powered by MaruB Creations" */}
-      <Footer onNavigatePage={handleNavigatePage} />
-
-      {/* Floating Back to Top Button */}
-      {showScrollTop && (
-        <button
-          onClick={scrollToTop}
-          aria-label="Back to Top"
-          className="fixed bottom-6 right-6 z-40 p-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-lg transition-all duration-200 active:scale-95 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500 flex items-center justify-center border border-white/20"
-        >
-          <ArrowUp className="w-5 h-5 stroke-[2.5]" />
-        </button>
-      )}
-    </div>
+      </div>
+    </CurrencyProvider>
   );
 }

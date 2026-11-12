@@ -117,7 +117,7 @@ export const CIPC_STEPS: CipcStep[] = [
       'Proof of residential address for FICA validation'
     ],
     tips: 'Ensure your ID photo and marital status match Home Affairs records to prevent automatic verification rejections.',
-    officialUrl: 'https://bizportal.gov.za/login.aspx',
+    officialUrl: 'https://www.bizportal.gov.za/login.aspx',
     actionText: 'Open BizPortal Registration Login'
   },
   {
@@ -132,7 +132,7 @@ export const CIPC_STEPS: CipcStep[] = [
       'R50 CIPC customer account balance or card payment'
     ],
     tips: 'Include distinctive keywords (e.g., "Kallie Logistics" instead of just "Logistics") to prevent conflicts with pre-existing registered trademarks.',
-    officialUrl: 'https://bizportal.gov.za/company_registration.aspx',
+    officialUrl: 'https://www.bizportal.gov.za/company_registration.aspx',
     actionText: 'Check Name Availability on BizPortal'
   },
   {
@@ -148,7 +148,7 @@ export const CIPC_STEPS: CipcStep[] = [
       'Initial authorized and issued share count (e.g., 100 or 1,000 ordinary par shares)'
     ],
     tips: 'For standard startups, 1,000 ordinary shares without nominal value is common practice, making future employee or co-founder equity allocation straightforward.',
-    officialUrl: 'https://bizportal.gov.za/company_registration.aspx',
+    officialUrl: 'https://www.bizportal.gov.za/company_registration.aspx',
     actionText: 'Submit CoR15.1A Director Details'
   },
   {
@@ -162,7 +162,7 @@ export const CIPC_STEPS: CipcStep[] = [
       'All directors must accept the appointment notification if requested'
     ],
     tips: 'Download and safely store multiple digital copies of CoR14.3 and the stamped MOI (CoR15.1A). These are required by every bank, funder, and vendor.',
-    officialUrl: 'https://bizportal.gov.za',
+    officialUrl: 'https://www.bizportal.gov.za/',
     actionText: 'Download CoR14.3 on BizPortal'
   },
   {
@@ -441,7 +441,7 @@ export const PREREQUISITES: PrerequisiteItem[] = [
     howToObtain: 'Issued automatically via BizPortal upon company registration, or retrieved via CIPC e-Services disclosure.',
     estimatedCost: 'Included in registration (or R30 reprint)',
     turnaroundTime: 'Instant download',
-    officialUrl: 'https://bizportal.gov.za',
+    officialUrl: 'https://www.bizportal.gov.za/',
     linkText: 'Download on BizPortal'
   },
   {
@@ -459,14 +459,14 @@ export const PREREQUISITES: PrerequisiteItem[] = [
   {
     id: 'bbee_affidavit',
     title: 'Sworn B-BBEE EME Affidavit',
-    issuer: 'Commissioner of Oaths (using official DTIC template)',
+    issuer: 'Commissioner of Oaths (Official CIPC / DTIC Template)',
     importance: 'Critical',
     description: 'For businesses with annual turnover under R10,000,000 (Exempted Micro Enterprise). Valid for 12 months and confirms black ownership percentage.',
-    howToObtain: 'Complete the official DTIC sworn affidavit template and sign before a Commissioner of Oaths (Police Station, Post Office, Bank Manager, or Attorney).',
-    estimatedCost: 'Free (or nominal R0 - R50)',
+    howToObtain: 'Download the official CIPC / DTIC sworn affidavit template and sign before a Commissioner of Oaths (Police Station, Post Office, Bank Manager, or Attorney).',
+    estimatedCost: 'Free (R0.00 at SAPS or Post Office)',
     turnaroundTime: 'Same day',
-    officialUrl: 'https://www.thedtic.gov.za/economic-empowerment/b-bbee/b-bbee-templates/',
-    linkText: 'DTIC Official Templates'
+    officialUrl: 'https://www.cipc.co.za/wp-content/uploads/2023/01/Affidavit-EME-Gen.pdf',
+    linkText: 'Download Official CIPC Affidavit (PDF)'
   },
   {
     id: 'bank_statements',
@@ -477,7 +477,7 @@ export const PREREQUISITES: PrerequisiteItem[] = [
     howToObtain: 'Download stamped statements from online banking app or request stamped copies at any branch.',
     estimatedCost: 'Free online / minimal branch fee',
     turnaroundTime: 'Instant',
-    officialUrl: 'https://bizportal.gov.za',
+    officialUrl: 'https://www.bizportal.gov.za/',
     linkText: 'Link Bank on BizPortal'
   },
   {
@@ -584,7 +584,7 @@ export const CIPC_FAST_TRACK_LINKS = [
   {
     title: 'BizPortal Registration Portal',
     desc: 'Register a new (Pty) Ltd online with instant CoR14.3 issuance and automated SARS tax number.',
-    url: 'https://bizportal.gov.za',
+    url: 'https://www.bizportal.gov.za/',
     label: 'Open BizPortal',
     isPrimary: true
   },
@@ -609,7 +609,7 @@ export const CIPC_FAST_TRACK_LINKS = [
   {
     title: 'Company Name Search & Reservation',
     desc: 'Verify if your desired company name is already registered before paying the R50 fee.',
-    url: 'https://bizportal.gov.za/company_registration.aspx',
+    url: 'https://www.bizportal.gov.za/company_registration.aspx',
     label: 'Search Company Names'
   },
   {

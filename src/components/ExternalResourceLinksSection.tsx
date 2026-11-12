@@ -23,7 +23,7 @@ const PORTALS: PortalLink[] = [
     name: 'CIPC BizPortal',
     department: 'Companies & Intellectual Property Commission',
     category: 'Registration & CIPC',
-    url: 'https://bizportal.gov.za',
+    url: 'https://www.bizportal.gov.za/',
     description: 'The official digital gateway for registering a new Private Company (Pty Ltd) in South Africa with instant electronic issuance of the CoR14.3 registration certificate.',
     primaryAction: 'Launch BizPortal',
     features: ['Instant CoR14.3 Certificate', 'Integrated SARS Tax Number', 'Company Name Reservation (R50)'],
@@ -148,6 +148,17 @@ const PORTALS: PortalLink[] = [
     description: 'Private-sector initiative enabling businesses to sponsor 12-month youth work experiences in exchange for moving up 1 to 2 full contributor levels on the B-BBEE scorecard.',
     primaryAction: 'Explore YES 4 Youth',
     features: ['Move 1-2 B-BBEE Levels Up', '12-Month Work Experience Model', 'Workplace Skills Validation'],
+    icon: 'bbee'
+  },
+  {
+    id: 'cipc-bbee-affidavit',
+    name: 'Official CIPC B-BBEE EME Affidavit (PDF)',
+    department: 'Companies and Intellectual Property Commission (CIPC)',
+    category: 'Procurement & Labour',
+    url: 'https://www.cipc.co.za/wp-content/uploads/2023/01/Affidavit-EME-Gen.pdf',
+    description: 'Direct download of the official CIPC / DTIC sworn affidavit template for Exempted Micro Enterprises (turnover under R10M). Stamped free at any SAPS police station or post office.',
+    primaryAction: 'Download Affidavit PDF',
+    features: ['Direct Official PDF Download', 'Valid for Under R10M Turnover', '100% Free Police Station Stamping'],
     icon: 'bbee'
   }
 ];

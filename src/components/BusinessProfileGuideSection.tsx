@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { 
   Briefcase, FileText, CheckCircle2, AlertTriangle, 
-  Download, Printer, Eye, Layers, ShieldCheck, 
-  Building2, Users, Trophy, ExternalLink, Copy, Check 
+  Printer, ChevronDown, Copy, Check, Sparkles, Building2, 
+  ShieldCheck, Layers 
 } from 'lucide-react';
+import { useCurrency } from '../context/CurrencyContext';
 
 interface ProfileSection {
   id: string;
@@ -113,34 +114,14 @@ const PROFILE_SECTIONS: ProfileSection[] = [
   }
 ];
 
-const COMMON_PROFILE_PITFALLS = [
-  {
-    title: 'Omitting the CSD MAAA Number',
-    desc: 'Government supply chain officers will not register your bid if your Treasury Central Supplier Database (CSD) number is missing from the cover page.'
-  },
-  {
-    title: 'Using Unprofessional Email Addresses',
-    desc: 'Using generic free emails (e.g., mybusiness@gmail.com or @yahoo.com) reduces institutional credibility. Invest in a custom domain email (info@yourcompany.co.za).'
-  },
-  {
-    title: 'Vague Capabilities Without Proof',
-    desc: 'Listing "we do all kinds of construction, consulting, and catering" reads as inexperienced. Focus on 2–3 clearly defined core services backed by tangible capabilities.'
-  },
-  {
-    title: 'Outdated Tax Status PINs',
-    desc: 'SARS TCS PINs are valid for 12 months. Printing an expired PIN in your profile guarantees immediate gatekeeper disqualification in tender reviews.'
-  },
-  {
-    title: 'Missing Contactable Reference Letters',
-    desc: 'Naming a past client without providing a contact person, telephone number, and official completion certificate costs you valuable functionality points.'
-  }
-];
-
 export const BusinessProfileGuideSection: React.FC = () => {
-  const [activeSectionId, setActiveSectionId] = useState<string>('executive-summary');
+  const [openChapterId, setOpenChapterId] = useState<string | null>('executive-summary');
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const activeSection = PROFILE_SECTIONS.find(s => s.id === activeSectionId) || PROFILE_SECTIONS[0];
+  const toggleChapter = (id: string) => {
+    // Only 1 chapter open at a time
+    setOpenChapterId(openChapterId === id ? null : id);
+  };
 
   const handleCopyText = (id: string, text: string) => {
     navigator.clipboard.writeText(text);
@@ -148,204 +129,145 @@ export const BusinessProfileGuideSection: React.FC = () => {
     setTimeout(() => setCopiedId(null), 2500);
   };
 
-  const handlePrint = () => {
+  const handlePrintSection = () => {
+    document.body.classList.add('print-section-business-profile');
     window.print();
+    setTimeout(() => {
+      document.body.classList.remove('print-section-business-profile');
+    }, 1500);
   };
 
   return (
     <section id="business-profile" className="py-12 lg:py-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
             <div className="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-1">
-              Procurement & Tender Readiness · Corporate Positioning
+              Procurement & Tender Readiness · SCM Blueprint
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
-              Creating a Professional Business Profile
+              Company Profile Guide (6 Chapters)
             </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-2xl">
-              An authoritative structural guide to building a winning South African company profile for government tenders, corporate Enterprise Supplier Development (ESD) programs, and institutional grant evaluators.
+            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-3xl leading-relaxed">
+              Step-by-step structural architecture for compiling a bankable corporate profile and winning public/private tenders.
             </p>
           </div>
 
-          <div className="flex items-center gap-2 self-start md:self-auto">
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Print / Save Section PDF Button */}
             <button
-              onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg shadow-xs transition-colors whitespace-nowrap"
+              type="button"
+              onClick={handlePrintSection}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
             >
-              <Printer className="w-3.5 h-3.5" />
-              <span>Print Profile Blueprint</span>
+              <Printer className="w-4 h-4" />
+              <span>Print / Save Section PDF</span>
             </button>
           </div>
         </div>
 
-        {/* 6 Essential Pillars Overview Strip */}
-        <div className="mb-10 p-6 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800">
-          <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-2">
-            <Layers className="w-4 h-4" />
-            <span>The 6 Mandatory Pillars of a South African Business Profile</span>
-          </div>
-          <p className="text-xs text-slate-600 dark:text-slate-400 max-w-3xl leading-relaxed mb-4">
-            A winning South African profile is not a generic marketing brochure; it is a legal and technical dossier that supply chain officers evaluate against strict procurement criteria.
-          </p>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-            {PROFILE_SECTIONS.map((sec) => (
-              <button
-                key={sec.id}
-                onClick={() => setActiveSectionId(sec.id)}
-                className={`p-3 rounded-xl border text-left transition-all ${
-                  activeSectionId === sec.id
-                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
-                }`}
-              >
-                <div className={`text-[10px] font-mono font-bold ${activeSectionId === sec.id ? 'text-emerald-200' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                  {sec.number}
-                </div>
-                <div className="text-xs font-bold mt-0.5 line-clamp-1">{sec.title.split('&')[0]}</div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 2-Column Split: Deep Dive on Selected Section + Boilerplate Copy Helper */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-12">
-          {/* Left Column: Comprehensive Structure Breakdown */}
-          <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xs space-y-6">
-            <div className="flex items-start justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
-              <div>
-                <div className="text-xs font-bold font-mono text-emerald-600 dark:text-emerald-400">
-                  Section {activeSection.number} of 06
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mt-0.5">
-                  {activeSection.title}
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  {activeSection.subtitle}
-                </p>
-              </div>
-            </div>
-
-            {/* Purpose */}
-            <div className="space-y-1.5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                Strategic Purpose
-              </h4>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                {activeSection.purpose}
-              </p>
-            </div>
-
-            {/* Mandatory Content Checklist */}
-            <div className="space-y-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                What Must Be Included
-              </h4>
-              <div className="space-y-2">
-                {activeSection.whatToInclude.map((item, idx) => (
-                  <div key={idx} className="flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Procurement Evaluator Focus Callout */}
-            <div className="p-4 rounded-xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/60 flex items-start gap-3">
-              <ShieldCheck className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-              <div className="text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
-                <strong className="block font-semibold mb-0.5">What Tender Evaluators Look For:</strong>
-                <span>{activeSection.evaluatorFocus}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column: Sample Wording & Boilerplate Card */}
-          <div className="lg:col-span-5 space-y-6">
-            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-700">
-                <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
-                  <FileText className="w-4 h-4 text-emerald-600" />
-                  <span>Sample Boilerplate Wording</span>
-                </div>
-                <button
-                  onClick={() => handleCopyText(activeSection.id, activeSection.sampleText)}
-                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
-                >
-                  {copiedId === activeSection.id ? (
-                    <>
-                      <Check className="w-3 h-3 text-emerald-600" />
-                      <span>Copied!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3 h-3" />
-                      <span>Copy Text</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
-              <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700/80 font-mono text-xs text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed">
-                {activeSection.sampleText}
-              </div>
-
-              <p className="text-[11px] text-slate-500 leading-relaxed">
-                Adapt this sample boilerplate with your registered details when assembling your company profile document in Microsoft Word, Google Docs, or Canva.
-              </p>
-            </div>
-
-            {/* Profile Design & Format Guidelines */}
-            <div className="p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
-              <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                Recommended Document Specifications
-              </h4>
-              <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-400">
-                <li className="flex items-start gap-2">
-                  <span className="font-semibold text-slate-900 dark:text-white">Length:</span>
-                  <span>4 to 8 pages maximum (evaluators prefer concise, scannable files).</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="font-semibold text-slate-900 dark:text-white">Format:</span>
-                  <span>Export as a single, high-resolution PDF under 5MB to avoid email gateway bouncebacks.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="font-semibold text-slate-900 dark:text-white">Cover Page:</span>
-                  <span>Must display Logo, Registered Legal Name, CIPC Reg No, CSD MAAA No, and B-BBEE Level.</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* Common Pitfalls in South African Business Profiles */}
-        <div className="p-6 sm:p-8 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800">
-          <div className="flex items-center gap-2 mb-4">
-            <AlertTriangle className="w-5 h-5 text-rose-600" />
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">
-              5 Critical Profile Pitfalls to Avoid in South Africa
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {COMMON_PROFILE_PITFALLS.map((pitfall, idx) => (
+        {/* Numbered Accordion Chapters (Strictly 1 Open at a Time on Screen, All Visible in Print) */}
+        <div className="space-y-3 max-w-4xl mx-auto mb-10">
+          {PROFILE_SECTIONS.map((sec) => {
+            const isOpen = openChapterId === sec.id;
+            return (
               <div
-                key={idx}
-                className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700/80 space-y-1.5"
+                key={sec.id}
+                className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden transition-all duration-200"
               >
-                <div className="text-xs font-bold text-rose-700 dark:text-rose-400">
-                  {idx + 1}. {pitfall.title}
+                {/* Accordion Chapter Header (3-Second Scan Rule) */}
+                <button
+                  type="button"
+                  onClick={() => toggleChapter(sec.id)}
+                  className="print-keep w-full p-4 sm:p-5 flex items-center justify-between text-left cursor-pointer hover:bg-slate-100/60 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <div className="flex items-center gap-3.5 pr-2">
+                    <span className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center justify-center shrink-0 font-mono">
+                      {sec.number}
+                    </span>
+                    <div>
+                      <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                        {sec.title}
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+                        {sec.subtitle}
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronDown className={`chevron-indicator w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Expanded Chapter Content (Visible when active, all expanded for print) */}
+                <div
+                  className={`p-5 pt-1 border-t border-slate-200 dark:border-slate-700 space-y-4 text-xs bg-white/50 dark:bg-slate-900/40 ${
+                    isOpen ? 'block animate-fade-in' : 'hidden print-show print:block'
+                  }`}
+                >
+                  <div>
+                    <span className="font-bold text-slate-900 dark:text-white block mb-1">Strategic Objective:</span>
+                    <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                      {sec.purpose}
+                    </p>
+                  </div>
+
+                  <div>
+                    <span className="font-bold text-slate-900 dark:text-white block mb-2 uppercase tracking-wider text-[11px]">
+                      What to Include:
+                    </span>
+                    <ul className="space-y-1.5 text-slate-600 dark:text-slate-300">
+                      {sec.whatToInclude.map((item, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="p-3 bg-amber-50/80 dark:bg-amber-950/20 rounded-xl border border-amber-200 dark:border-amber-800/50">
+                    <span className="font-bold text-amber-900 dark:text-amber-200 block mb-0.5">Tender Evaluator Focus:</span>
+                    <p className="text-amber-800 dark:text-amber-300 leading-relaxed">
+                      {sec.evaluatorFocus}
+                    </p>
+                  </div>
+
+                  {/* Copyable Sample Project Text */}
+                  <div className="space-y-2 pt-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">
+                        Sample Fill-In Template Text:
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopyText(sec.id, sec.sampleText)}
+                        className="print-hide inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 cursor-pointer"
+                      >
+                        {copiedId === sec.id ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>Copied to Clipboard!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>Copy Sample Text</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    <pre className="p-3.5 bg-slate-900 text-slate-200 rounded-xl text-xs font-mono whitespace-pre-wrap leading-relaxed overflow-x-auto">
+                      {sec.sampleText}
+                    </pre>
+                  </div>
                 </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                  {pitfall.desc}
-                </p>
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
+
       </div>
     </section>
   );

@@ -1,24 +1,31 @@
 import React, { useState } from 'react';
 import { 
   ShieldCheck, CheckCircle, Copy, Check, Printer,
-  Layers, Truck, Zap 
+  Layers, Truck, Zap, ChevronDown, Sparkles, FileText, 
+  TrendingUp, DollarSign, Calculator 
 } from 'lucide-react';
+import { useCurrency } from '../context/CurrencyContext';
 
 export const SampleBusinessPlanSection: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'summary' | 'operations' | 'income' | 'cashflow' | 'ratios' | 'fulltext'>('summary');
+  const { formatMoney } = useCurrency();
+  const [openChapter, setOpenChapter] = useState<number | null>(1); // Only 1 chapter open at a time
   const [scenario, setScenario] = useState<'base' | 'conservative' | 'growth'>('base');
   const [copied, setCopied] = useState(false);
 
+  const toggleChapter = (chapterNum: number) => {
+    setOpenChapter(openChapter === chapterNum ? null : chapterNum);
+  };
+
+  const handlePrintSection = () => {
+    document.body.classList.add('print-section-business-plan');
+    window.print();
+    setTimeout(() => {
+      document.body.classList.remove('print-section-business-plan');
+    }, 1500);
+  };
+
   // Scenario multipliers
   const scenarioMultiplier = scenario === 'growth' ? 1.25 : scenario === 'conservative' ? 0.85 : 1.0;
-
-  const formatZAR = (amount: number) => {
-    return new Intl.NumberFormat('en-ZA', {
-      style: 'currency',
-      currency: 'ZAR',
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
 
   // Base financial figures
   const year1Rev = Math.round(1850000 * scenarioMultiplier);
@@ -70,580 +77,392 @@ export const SampleBusinessPlanSection: React.FC = () => {
     { month: 'Month 12', inflow: 205000, outflow: 148000, net: 57000, balance: 552000 },
   ];
 
-  const fullPlanText = `================================================================================
-BANKABLE BUSINESS PLAN & FINANCIAL BLUEPRINT (SOUTH AFRICA)
-Entity: KasiFresh Logistics & Cold-Chain Solutions (Pty) Ltd
-Registration No: 2024/718392/07 | B-BBEE Level: Level 1 (135% Recognition)
-Statutory Alignment: Companies Act 71 of 2008 | SARS SBC Regulated
-================================================================================
+  const handleCopyFullPlan = () => {
+    const fullPlanText = `
+BANKABLE BUSINESS PLAN & FINANCIAL MODEL (SOUTH AFRICA)
+VENTURE: KasiCourier Logistics & Last-Mile Solutions (Pty) Ltd
+REGISTRATION NO: 2026/014920/07 | TAX PIN: 9021849201 | B-BBEE: Level 1 (135% Recognition)
 
 1. EXECUTIVE SUMMARY
-Company Name: KasiFresh Logistics & Cold-Chain Solutions (Pty) Ltd
-Operating Base: City of Johannesburg & Tshwane Fresh Produce Corridors
-Business Structure: Private Company (Pty Ltd), 100% Black Youth Owned
-Funding Ask: R850,000 (R350,000 SEDFA/NYDA Asset Grant + R400,000 Debt Facility + R100,000 Equity)
+KasiCourier Logistics & Last-Mile Solutions (Pty) Ltd is a registered South African black-youth-owned courier logistics enterprise operating from Soweto, Gauteng. The enterprise bridges critical e-commerce fulfillment and pharmacy deliveries in high-density townships.
 
-Problem Solved: 
-Over 35% of fresh horticultural produce distributed to township retailers, informal spaza shops, and local shisanyamas spoils before retail sale due to unreliable ambient transport and municipal loadshedding blackouts.
+2. FINANCIAL HIGHLIGHTS (3-YEAR FORECAST)
+• Year 1 Turnover: R1,850,000 | Net Profit: R212,080 | Gross Margin: 50.0%
+• Year 2 Turnover: R2,980,000 | Net Profit: R493,640 | Gross Margin: 52.0%
+• Year 3 Turnover: R4,450,000 | Net Profit: R860,320 | Gross Margin: 54.0%
+• Initial Capital Required: R350,000 (R150,000 founder equity + R200,000 asset finance)
+• Break-Even Run-Rate: 38.6 parcels/day at R85.00 average ticket size (R98,400 monthly revenue).
+    `.trim();
 
-Our Solution:
-A solar-backed refrigerated logistics and micro-cold storage service providing scheduled fresh deliveries from smallholder farmers in Gauteng and Limpopo directly to urban informal merchants, extending retail shelf life by 4 to 6 days.
-
-2. STATUTORY & COMPLIANCE READINESS
-- CIPC CoR14.3 Active Registration Certificate (Verified)
-- SARS Tax Pin in Good Standing (Registered for Income Tax & PAYE)
-- Small Business Corporation (SBC) tax qualification under section 12E
-- COIDA Letter of Good Standing for driver and warehouse handlers
-- Health Certificate for Food Handling (R638 Municipal Food Safety Regulations)
-- B-BBEE Sworn Affidavit: Level 1 EME Contributor (135% B2B procurement boost)
-
-3. 3-YEAR PROJECTED INCOME STATEMENT (P&L) - BASE CASE
-Metric                       Year 1             Year 2             Year 3
---------------------------------------------------------------------------------
-Gross Revenue                R1,850,000         R2,980,000         R4,450,000
-Cost of Goods Sold (COGS)    R925,000           R1,430,000         R2,047,000
-Gross Profit                 R925,000 (50.0%)   R1,550,000 (52.0%) R2,403,000 (54.0%)
-Operating Expenses (OPEX)    R584,000           R812,000           R1,120,000
-  - Salaries & Wages         R288,000           R410,000           R560,000
-  - Diesel & Fleet Service   R144,000           R208,000           R290,000
-  - Commercial Insurance     R42,000            R58,000            R78,000
-  - Rent & Utilities (Hub)   R60,000            R72,000            R92,000
-  - Accounting & Compliance  R24,000            R30,000            R42,000
-  - Software & Tracking      R26,000            R34,000            R58,000
-EBITDA                       R341,000 (18.4%)   R738,000 (24.8%)   R1,283,000 (28.8%)
-Depreciation & Amort.        R70,000            R110,000           R150,000
-Finance Costs (Interest)     R48,000            R36,000            R22,000
-Earnings Before Tax (EBT)    R223,000           R592,000           R1,111,000
-SARS SBC Income Tax          R23,600            R98,400            R272,000
-Net Profit After Tax         R199,400 (10.8%)   R493,600 (16.6%)   R839,000 (18.9%)
-
-4. STARTUP CAPEX & USES OF FUNDS (R850,000)
-- 4-Tonne Refrigerated Truck (Refurbished Isuzu NPR with Carrier Unit): R420,000
-- 10kW Solar Microgrid + 15kWh LiFePO4 Inverter for Cold Room: R210,000
-- Cold Storage Insulated Modular Pod (20-foot container fitout): R75,000
-- Plastic Agri Crates, Temperature Loggers & Pallet Jacks: R35,000
-- Regulatory Audits, HACCP & Vehicle Decals: R15,000
-- Working Capital Float (Fuel, initial farmer prepayments, cash buffer): R95,000
-
-5. KEY RATIOS & BANKABILITY METRICS
-- Monthly Break-Even Turnover: R103,400 / month (achieved by Month 2)
-- Debt Service Coverage Ratio (DSCR): 3.8x (commercial bank benchmark is >= 1.25x)
-- Current Ratio (Liquidity): 2.1x
-- Estimated Capital Payback Period: 19 Months
-================================================================================`;
-
-  const handleCopy = () => {
     navigator.clipboard.writeText(fullPlanText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   return (
     <section id="business-plan" className="py-12 lg:py-16 bg-slate-50/80 dark:bg-slate-950/40 border-b border-slate-200 dark:border-slate-800 transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div className="space-y-2">
-            <div className="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-              Institutional Blueprint & Financial Projections
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-1">
+              Bankable Financials & Projections · Commercial Credit Standard
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              Sample Bankable Business Plan with Financials
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+              Sample Business Plan & Financial Model
             </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400 max-w-3xl leading-relaxed">
-              A comprehensive, real-world South African SME business plan blueprint structured for commercial lenders (Standard Bank, Nedbank, FNB, Absa) and public grant bodies (SEDFA, NYDA, NEF, IDC).
+            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-3xl leading-relaxed">
+              Full bank-ready business plan formatted into 6 structured chapters with audited 3-year P&L, 12-month cash flows, and break-even calculations.
             </p>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Print / Save Section PDF Button */}
             <button
-              onClick={handleCopy}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
-            >
-              {copied ? (
-                <>
-                  <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  <span className="text-emerald-700 dark:text-emerald-400">Copied to Clipboard!</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-4 h-4" />
-                  <span>Copy Full Plan Text</span>
-                </>
-              )}
-            </button>
-            <button
-              onClick={handlePrint}
+              type="button"
+              onClick={handlePrintSection}
               className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
             >
               <Printer className="w-4 h-4" />
-              <span>Print / Export PDF</span>
+              <span>Print / Save Section PDF</span>
             </button>
           </div>
         </div>
 
-        {/* Executive Case Study Banner */}
-        <div className="p-4 sm:p-5 bg-emerald-950/10 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="font-bold text-emerald-700 dark:text-emerald-400">Case Study Entity:</span>
-              <span className="font-semibold text-slate-900 dark:text-white">KasiFresh Logistics & Cold-Chain (Pty) Ltd</span>
-              <span className="text-slate-400">·</span>
-              <span className="text-slate-600 dark:text-slate-300">Reg: 2024/718392/07</span>
-              <span className="text-slate-400">·</span>
-              <span className="text-emerald-600 dark:text-emerald-400 font-medium">B-BBEE Level 1 (135% Recognition)</span>
+        {/* Global Scenario Selector Pill (Hidden in Print) */}
+        <div className="print-hide flex items-center justify-between flex-wrap gap-3 mb-6 p-3 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-slate-700 dark:text-slate-300">Financial Scenario:</span>
+            <div className="flex gap-1">
+              {(['conservative', 'base', 'growth'] as const).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setScenario(s)}
+                  className={`px-3 py-1 rounded-lg font-medium transition-colors cursor-pointer capitalize ${
+                    scenario === s
+                      ? 'bg-emerald-600 text-white font-bold shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
             </div>
-            <p className="text-xs text-slate-600 dark:text-slate-400">
-              Sector: Agro-logistics & township FMCG distribution · Target Funding: <strong>R850,000</strong> (Capex + Working Capital float)
-            </p>
           </div>
 
-          {/* Scenario Selector */}
-          <div className="flex items-center gap-1.5 bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 text-xs shrink-0">
-            <span className="text-slate-400 text-[11px] px-2 font-medium">Scenario:</span>
-            <button
-              onClick={() => setScenario('conservative')}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-colors cursor-pointer ${
-                scenario === 'conservative'
-                  ? 'bg-slate-900 text-white dark:bg-slate-700'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
-              }`}
-            >
-              Conservative (-15%)
-            </button>
-            <button
-              onClick={() => setScenario('base')}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-colors cursor-pointer ${
-                scenario === 'base'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
-              }`}
-            >
-              Base Case
-            </button>
-            <button
-              onClick={() => setScenario('growth')}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-colors cursor-pointer ${
-                scenario === 'growth'
-                  ? 'bg-emerald-700 text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
-              }`}
-            >
-              High Growth (+25%)
-            </button>
+          <div className="text-[11px] text-slate-500 dark:text-slate-400">
+            Year 1 Net Profit: <span className="font-bold text-emerald-600 font-mono">{formatMoney(year1Net)}</span> ({formatMoney(year1Rev)} revenue)
           </div>
         </div>
 
-        {/* Section Navigation Tabs (no-scrollbar & flex-wrap) */}
-        <div className="flex flex-wrap items-center gap-1.5 p-1.5 bg-slate-200/80 dark:bg-slate-800 rounded-xl text-xs font-medium no-scrollbar max-w-fit">
-          <button
-            onClick={() => setActiveTab('summary')}
-            className={`px-3.5 py-1.5 rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
-              activeTab === 'summary'
-                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-semibold'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            1. Executive Strategy
-          </button>
-          <button
-            onClick={() => setActiveTab('operations')}
-            className={`px-3.5 py-1.5 rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
-              activeTab === 'operations'
-                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-semibold'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            2. Operations & Solar Backup
-          </button>
-          <button
-            onClick={() => setActiveTab('income')}
-            className={`px-3.5 py-1.5 rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
-              activeTab === 'income'
-                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-semibold'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            3. 3-Year Income Statement (P&L)
-          </button>
-          <button
-            onClick={() => setActiveTab('cashflow')}
-            className={`px-3.5 py-1.5 rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
-              activeTab === 'cashflow'
-                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-semibold'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            4. 12-Month Cash Flow & Capex
-          </button>
-          <button
-            onClick={() => setActiveTab('ratios')}
-            className={`px-3.5 py-1.5 rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
-              activeTab === 'ratios'
-                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-semibold'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            5. Break-Even & Financial Ratios
-          </button>
-          <button
-            onClick={() => setActiveTab('fulltext')}
-            className={`px-3.5 py-1.5 rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
-              activeTab === 'fulltext'
-                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-semibold'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            6. Full Text Document View
-          </button>
-        </div>
-
-        {/* TAB 1: EXECUTIVE SUMMARY */}
-        {activeTab === 'summary' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <div className="lg:col-span-8 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-6 shadow-xs">
-              <div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                  Executive Business Overview
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Drafted under South African commercial bank standard credit evaluation criteria.
-                </p>
-              </div>
-
-              <div className="space-y-4 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-                <p>
-                  <strong>KasiFresh Logistics & Cold-Chain Solutions (Pty) Ltd</strong> is an emerging, 100% black youth-owned agro-logistics venture established to resolve perishable crop spoilage between peri-urban commercial smallholder farms in Limpopo & Gauteng and dense urban retail nodes in Johannesburg and Pretoria.
-                </p>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 my-4">
-                  <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
-                    <span className="font-bold text-emerald-600 dark:text-emerald-400 block mb-1">
-                      The Market Pain Point
-                    </span>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">
-                      Township retailers, spaza shops, and shisanyamas lose up to 35% of fresh inventory to spoilage within 48 hours because suppliers transport goods in open bakkies and store them without temperature control during municipal power outages.
-                    </p>
-                  </div>
-                  <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
-                    <span className="font-bold text-emerald-600 dark:text-emerald-400 block mb-1">
-                      Our Proprietary Solution
-                    </span>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">
-                      Scheduled deliveries in a 4-tonne active refrigerated vehicle combined with a centralized 10kW solar-backed modular cold room hub. Spaza clients order via WhatsApp B2B bot with next-day 06:00 AM delivery guaranteed.
-                    </p>
-                  </div>
-                </div>
-
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white pt-2">
-                  Funding Structure Breakdown (R850,000 Total Ask)
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800">
-                    <div className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300">SEDFA / NYDA Grant</div>
-                    <div className="text-lg font-extrabold text-emerald-700 dark:text-emerald-400 mt-1">R350,000</div>
-                    <div className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">Non-repayable equipment funding for solar cold storage</div>
-                  </div>
-                  <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                    <div className="text-[11px] font-semibold text-slate-800 dark:text-slate-300">SME Term Debt (Bank)</div>
-                    <div className="text-lg font-extrabold text-slate-900 dark:text-white mt-1">R400,000</div>
-                    <div className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">Prime + 1.5% loan over 48 months (asset-backed)</div>
-                  </div>
-                  <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                    <div className="text-[11px] font-semibold text-slate-800 dark:text-slate-300">Founder Equity Float</div>
-                    <div className="text-lg font-extrabold text-slate-900 dark:text-white mt-1">R100,000</div>
-                    <div className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">Reinvested cash savings for working capital float</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column: Key Statutory Highlights */}
-            <div className="lg:col-span-4 space-y-4">
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 shadow-xs">
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  <span>Statutory Compliance Checklist</span>
-                </h4>
-                <ul className="space-y-2.5 text-xs text-slate-600 dark:text-slate-400">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <span><strong>CIPC CoR14.3:</strong> Active status under registration number 2024/718392/07</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <span><strong>SARS SBC Regulated:</strong> Qualifies for Small Business Corporation graduated corporate tax bands</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <span><strong>B-BBEE Level 1:</strong> 100% Black Youth Owned EME Sworn Affidavit with 135% procurement score</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <span><strong>Labour (UIF & COIDA):</strong> Letter of Good Standing from Compensation Fund active</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <span><strong>Municipal Health:</strong> Regulation R638 Certificate of Acceptability for Food Handling</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="p-5 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-200 dark:border-emerald-800 text-xs space-y-2">
-                <div className="font-bold text-emerald-900 dark:text-emerald-300">Why Commercial Lenders Approve This</div>
-                <p className="text-emerald-800 dark:text-emerald-400 leading-relaxed">
-                  The plan shows a <strong>Debt Service Coverage Ratio (DSCR) of 3.8x</strong> in Year 1, well above the 1.25x bank minimum. Loan repayments of ~R10,400/month are fully covered by contractual spaza delivery retainers.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 2: OPERATIONS & LOADSHEDDING */}
-        {activeTab === 'operations' && (
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-6 shadow-xs">
-            <div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                Operational Logistics & Energy Resilience
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                South African businesses must demonstrate structural resilience to municipal grid interruptions and fuel price volatility.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="p-5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
-                <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-bold">
-                  <Zap className="w-4 h-4" />
-                </div>
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                  Loadshedding & Solar Hub
-                </h4>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                  A modular 20-foot insulated container fitted with a 10kW hybrid inverter and 15kWh LiFePO4 battery array. Provides 18 hours of continuous refrigeration (+2°C to +4°C) without reliance on Eskom or noisy petrol generators.
-                </p>
-              </div>
-
-              <div className="p-5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
-                <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-bold">
-                  <Truck className="w-4 h-4" />
-                </div>
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                  Fleet Route Optimization
-                </h4>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                  Route 1 runs Monday/Wednesday/Friday covering Soweto, Diepsloot, and Alexandra (45 drop points). Route 2 runs Tuesday/Thursday/Saturday servicing Tembisa and Mamelodi (38 drop points). GPS tracking controls diesel consumption.
-                </p>
-              </div>
-
-              <div className="p-5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
-                <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-bold">
-                  <Layers className="w-4 h-4" />
-                </div>
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                  Farmer Offtake Agreements
-                </h4>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                  Bilateral supply agreements with 14 smallholder tomato, onion, and leafy greens farmers in Marble Hall & Brits. Guarantees farmgate purchase within 12 hours of harvest, bypassing wholesale agent markups.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-4 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex items-center justify-between">
-              <span className="text-slate-700 dark:text-slate-300 font-medium">
-                Target Employment Creation: <strong>4 Permanent Youth Jobs</strong> in Year 1 (1 Driver, 1 Hub Ops Lead, 2 Inventory Handlers).
-              </span>
-              <span className="text-emerald-600 dark:text-emerald-400 font-bold">
-                SETA & ETI Eligible
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: 3-YEAR INCOME STATEMENT (P&L) */}
-        {activeTab === 'income' && (
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-6 shadow-xs overflow-hidden">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                  3-Year Projected Income Statement (P&L)
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Adjusting dynamically based on selected scenario: <strong>{scenario.toUpperCase()}</strong>. Figures in South African Rand (ZAR).
-                </p>
-              </div>
-              <div className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                SARS SBC Tax Rates Applied
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs text-left text-slate-700 dark:text-slate-300">
-                <thead className="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white uppercase text-[11px] font-bold">
-                  <tr>
-                    <th className="py-3 px-4">Line Item (ZAR)</th>
-                    <th className="py-3 px-4 text-right">Year 1</th>
-                    <th className="py-3 px-4 text-right">Year 2</th>
-                    <th className="py-3 px-4 text-right">Year 3</th>
-                    <th className="py-3 px-4 text-right">Growth (Y1 to Y3)</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200 dark:divide-slate-800 font-mono">
-                  <tr className="font-bold text-slate-900 dark:text-white bg-slate-50/50 dark:bg-slate-900/50">
-                    <td className="py-2.5 px-4 font-sans">Gross Turnover (Revenue)</td>
-                    <td className="py-2.5 px-4 text-right">{formatZAR(year1Rev)}</td>
-                    <td className="py-2.5 px-4 text-right">{formatZAR(year2Rev)}</td>
-                    <td className="py-2.5 px-4 text-right">{formatZAR(year3Rev)}</td>
-                    <td className="py-2.5 px-4 text-right text-emerald-600">+{Math.round(((year3Rev - year1Rev) / year1Rev) * 100)}%</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2.5 px-4 font-sans text-slate-600 dark:text-slate-400">Cost of Goods Sold (Farmgate Purchases)</td>
-                    <td className="py-2.5 px-4 text-right text-red-600">({formatZAR(year1Cogs)})</td>
-                    <td className="py-2.5 px-4 text-right text-red-600">({formatZAR(year2Cogs)})</td>
-                    <td className="py-2.5 px-4 text-right text-red-600">({formatZAR(year3Cogs)})</td>
-                    <td className="py-2.5 px-4 text-right text-slate-400">50% avg</td>
-                  </tr>
-                  <tr className="font-semibold bg-emerald-50/40 dark:bg-emerald-950/20 text-emerald-900 dark:text-emerald-300">
-                    <td className="py-2.5 px-4 font-sans">Gross Profit</td>
-                    <td className="py-2.5 px-4 text-right">{formatZAR(year1Gross)}</td>
-                    <td className="py-2.5 px-4 text-right">{formatZAR(year2Gross)}</td>
-                    <td className="py-2.5 px-4 text-right">{formatZAR(year3Gross)}</td>
-                    <td className="py-2.5 px-4 text-right font-bold">{Math.round((year3Gross / year3Rev) * 100)}% Margin</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2.5 px-4 font-sans text-slate-600 dark:text-slate-400">Operating Expenses (OPEX total)</td>
-                    <td className="py-2.5 px-4 text-right text-red-600">({formatZAR(year1Opex)})</td>
-                    <td className="py-2.5 px-4 text-right text-red-600">({formatZAR(year2Opex)})</td>
-                    <td className="py-2.5 px-4 text-right text-red-600">({formatZAR(year3Opex)})</td>
-                    <td className="py-2.5 px-4 text-right text-slate-400">Salaries, fuel, rent</td>
-                  </tr>
-                  <tr className="font-bold text-slate-900 dark:text-white">
-                    <td className="py-2.5 px-4 font-sans">EBITDA</td>
-                    <td className="py-2.5 px-4 text-right">{formatZAR(year1Ebitda)}</td>
-                    <td className="py-2.5 px-4 text-right">{formatZAR(year2Ebitda)}</td>
-                    <td className="py-2.5 px-4 text-right">{formatZAR(year3Ebitda)}</td>
-                    <td className="py-2.5 px-4 text-right text-emerald-600 font-bold">{Math.round((year1Ebitda / year1Rev) * 100)}% &rarr; {Math.round((year3Ebitda / year3Rev) * 100)}%</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2.5 px-4 font-sans text-slate-600 dark:text-slate-400">Depreciation (Fleet & Cold Pod)</td>
-                    <td className="py-2.5 px-4 text-right text-slate-500">({formatZAR(year1Depr)})</td>
-                    <td className="py-2.5 px-4 text-right text-slate-500">({formatZAR(year2Depr)})</td>
-                    <td className="py-2.5 px-4 text-right text-slate-500">({formatZAR(year3Depr)})</td>
-                    <td className="py-2.5 px-4 text-right text-slate-400">Section 12B/12C</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2.5 px-4 font-sans text-slate-600 dark:text-slate-400">Finance Charges (Term Loan Interest)</td>
-                    <td className="py-2.5 px-4 text-right text-slate-500">({formatZAR(year1Interest)})</td>
-                    <td className="py-2.5 px-4 text-right text-slate-500">({formatZAR(year2Interest)})</td>
-                    <td className="py-2.5 px-4 text-right text-slate-500">({formatZAR(year3Interest)})</td>
-                    <td className="py-2.5 px-4 text-right text-slate-400">Declining balance</td>
-                  </tr>
-                  <tr className="font-semibold text-slate-900 dark:text-white">
-                    <td className="py-2.5 px-4 font-sans">Net Profit Before Tax (EBT)</td>
-                    <td className="py-2.5 px-4 text-right">{formatZAR(year1Ebt)}</td>
-                    <td className="py-2.5 px-4 text-right">{formatZAR(year2Ebt)}</td>
-                    <td className="py-2.5 px-4 text-right">{formatZAR(year3Ebt)}</td>
-                    <td className="py-2.5 px-4 text-right text-emerald-600">Healthy</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2.5 px-4 font-sans text-slate-600 dark:text-slate-400">SARS Small Business Corp Tax</td>
-                    <td className="py-2.5 px-4 text-right text-red-600">({formatZAR(year1Tax)})</td>
-                    <td className="py-2.5 px-4 text-right text-red-600">({formatZAR(year2Tax)})</td>
-                    <td className="py-2.5 px-4 text-right text-red-600">({formatZAR(year3Tax)})</td>
-                    <td className="py-2.5 px-4 text-right text-slate-400">Tiered SBC rate</td>
-                  </tr>
-                  <tr className="font-extrabold bg-emerald-600 text-white text-sm">
-                    <td className="py-3 px-4 font-sans">Net Profit After Tax</td>
-                    <td className="py-3 px-4 text-right">{formatZAR(year1Net)}</td>
-                    <td className="py-3 px-4 text-right">{formatZAR(year2Net)}</td>
-                    <td className="py-3 px-4 text-right">{formatZAR(year3Net)}</td>
-                    <td className="py-3 px-4 text-right font-mono">{Math.round((year3Net / year3Rev) * 100)}% Net Margin</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 4: 12-MONTH CASH FLOW & CAPEX */}
-        {activeTab === 'cashflow' && (
-          <div className="space-y-6">
-            {/* Capex Table */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-4 shadow-xs">
-              <div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                  Capital Expenditure (Capex) & Startup Budget
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Itemized assets funded by the R850,000 blended capital injection.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
-                  <div className="text-xs text-slate-500 dark:text-slate-400">Refrigerated Truck (4-Tonne)</div>
-                  <div className="text-lg font-bold text-slate-900 dark:text-white mt-1">R420,000</div>
-                  <div className="text-[11px] text-slate-500 mt-1">Refurbished Isuzu NPR + Carrier Unit</div>
-                </div>
-                <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
-                  <div className="text-xs text-slate-500 dark:text-slate-400">Solar Cold Room (10kW)</div>
-                  <div className="text-lg font-bold text-slate-900 dark:text-white mt-1">R210,000</div>
-                  <div className="text-[11px] text-slate-500 mt-1">15kWh Lithium Battery + Panels</div>
-                </div>
-                <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
-                  <div className="text-xs text-slate-500 dark:text-slate-400">Insulated Pod & Crates</div>
-                  <div className="text-lg font-bold text-slate-900 dark:text-white mt-1">R110,000</div>
-                  <div className="text-[11px] text-slate-500 mt-1">20-ft container fitout + 400 crates</div>
-                </div>
-                <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800">
-                  <div className="text-xs text-emerald-800 dark:text-emerald-300">Working Capital Reserve</div>
-                  <div className="text-lg font-bold text-emerald-700 dark:text-emerald-400 mt-1">R110,000</div>
-                  <div className="text-[11px] text-emerald-800/80 dark:text-emerald-400/80 mt-1">Farmer prepayment float & diesel</div>
-                </div>
-              </div>
-            </div>
-
-            {/* 12-Month Cashflow Table */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-4 shadow-xs overflow-hidden">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        {/* Numbered Accordion Chapters (Strictly 1 Chapter Open at a Time on Screen, All Visible in Print) */}
+        <div className="space-y-3 max-w-5xl mx-auto mb-10">
+          
+          {/* CHAPTER 1 */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden transition-all duration-200 shadow-xs">
+            <button
+              type="button"
+              onClick={() => toggleChapter(1)}
+              className="print-keep w-full p-4 sm:p-5 flex items-center justify-between text-left cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+            >
+              <div className="flex items-center gap-3.5 pr-2">
+                <span className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center justify-center shrink-0 font-mono">
+                  01
+                </span>
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                    Year 1 Monthly Cash Flow Forecast
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                    Executive Summary & Venture Profile
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    Demonstrates zero liquidity deficit across all 12 operational months.
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+                    KasiCourier Logistics (Pty) Ltd · Last-mile urban courier solving high-density delivery friction
                   </p>
                 </div>
-                <div className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-bold">
-                  Closing Cash Month 12: R552,000
+              </div>
+              <ChevronDown className={`chevron-indicator print-hide w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200 ${openChapter === 1 ? 'rotate-180' : ''}`} />
+            </button>
+
+            <div className={`p-5 pt-1 border-t border-slate-100 dark:border-slate-800 space-y-4 text-xs leading-relaxed text-slate-700 dark:text-slate-300 ${openChapter === 1 ? 'block animate-fade-in' : 'hidden print-show print:block'}`}>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700 font-mono">
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase block font-sans">Required Capital</span>
+                  <span className="font-bold text-slate-900 dark:text-white text-sm">{formatMoney(350000)}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase block font-sans">Yr 1 Projected Revenue</span>
+                  <span className="font-bold text-emerald-600 text-sm">{formatMoney(year1Rev)}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase block font-sans">Yr 1 Net Margin</span>
+                  <span className="font-bold text-slate-900 dark:text-white text-sm">{Math.round((year1Net / year1Rev) * 100)}%</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase block font-sans">Payback Period</span>
+                  <span className="font-bold text-slate-900 dark:text-white text-sm">18.4 Months</span>
                 </div>
               </div>
 
+              <p>
+                <strong>1.1 Opportunity:</strong> Mainstream couriers frequently reject township deliveries or drop parcels at perimeter depots due to informal address grids and driver safety concerns. KasiCourier employs local marshals and geo-pin tech to ensure guaranteed same-day delivery.
+              </p>
+              <p>
+                <strong>1.2 Business Model:</strong> B2B merchant contracts (e-commerce retailers and pharmaceutical chains) at R75–R120 per parcel, supplemented by on-demand consumer peer-to-peer dropoffs at local spaza hubs.
+              </p>
+            </div>
+          </div>
+
+          {/* CHAPTER 2 */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden transition-all duration-200 shadow-xs">
+            <button
+              type="button"
+              onClick={() => toggleChapter(2)}
+              className="print-keep w-full p-4 sm:p-5 flex items-center justify-between text-left cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+            >
+              <div className="flex items-center gap-3.5 pr-2">
+                <span className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center justify-center shrink-0 font-mono">
+                  02
+                </span>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                    Market Analysis, Competitors & Pricing Strategy
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+                    Total Addressable Market (TAM) of R1.2B in township delivery with 3 distinct price tiers
+                  </p>
+                </div>
+              </div>
+              <ChevronDown className={`chevron-indicator print-hide w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200 ${openChapter === 2 ? 'rotate-180' : ''}`} />
+            </button>
+
+            <div className={`p-5 pt-1 border-t border-slate-100 dark:border-slate-800 space-y-3 text-xs leading-relaxed text-slate-700 dark:text-slate-300 ${openChapter === 2 ? 'block animate-fade-in' : 'hidden print-show print:block'}`}>
+              <div className="space-y-2">
+                <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">
+                  Pricing Architecture:
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div className="font-bold text-slate-900 dark:text-white">Standard Delivery (24hr)</div>
+                    <div className="text-emerald-600 font-mono font-bold text-sm mt-1">{formatMoney(65)}</div>
+                    <div className="text-[11px] text-slate-500 mt-0.5">Under 5kg within 15km radius</div>
+                  </div>
+                  <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div className="font-bold text-slate-900 dark:text-white">Express Same-Day (4hr)</div>
+                    <div className="text-emerald-600 font-mono font-bold text-sm mt-1">{formatMoney(110)}</div>
+                    <div className="text-[11px] text-slate-500 mt-0.5">Priority pharmacy & grocery runs</div>
+                  </div>
+                  <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div className="font-bold text-slate-900 dark:text-white">Bulk Merchant Contract</div>
+                    <div className="text-emerald-600 font-mono font-bold text-sm mt-1">{formatMoney(48)}/unit</div>
+                    <div className="text-[11px] text-slate-500 mt-0.5">Minimum 250 deliveries per month</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CHAPTER 3 */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden transition-all duration-200 shadow-xs">
+            <button
+              type="button"
+              onClick={() => toggleChapter(3)}
+              className="print-keep w-full p-4 sm:p-5 flex items-center justify-between text-left cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+            >
+              <div className="flex items-center gap-3.5 pr-2">
+                <span className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center justify-center shrink-0 font-mono">
+                  03
+                </span>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                    Operations, Fleet & Capital Expenditure (Capex)
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+                    Initial {formatMoney(350000)} deployment: 2 fuel-efficient delivery bakkies, 4 electric cargo bikes & staging micro-depot
+                  </p>
+                </div>
+              </div>
+              <ChevronDown className={`chevron-indicator print-hide w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200 ${openChapter === 3 ? 'rotate-180' : ''}`} />
+            </button>
+
+            <div className={`p-5 pt-1 border-t border-slate-100 dark:border-slate-800 space-y-3 text-xs text-slate-700 dark:text-slate-300 ${openChapter === 3 ? 'block animate-fade-in' : 'hidden print-show print:block'}`}>
               <div className="overflow-x-auto">
-                <table className="w-full text-xs text-left text-slate-700 dark:text-slate-300">
-                  <thead className="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white uppercase text-[11px] font-bold">
-                    <tr>
-                      <th className="py-2.5 px-3">Month</th>
-                      <th className="py-2.5 px-3 text-right">Inflows (Receipts)</th>
-                      <th className="py-2.5 px-3 text-right">Outflows (Costs + Debt)</th>
-                      <th className="py-2.5 px-3 text-right">Net Monthly Cash</th>
-                      <th className="py-2.5 px-3 text-right">Closing Bank Float</th>
+                <table className="w-full text-left font-mono">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-400 uppercase text-[10px]">
+                      <th className="py-2">Asset Item</th>
+                      <th className="py-2">Quantity</th>
+                      <th className="py-2">Financing Method</th>
+                      <th className="py-2 text-right">Total Cost</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800 font-mono">
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    <tr>
+                      <td className="py-2 text-slate-900 dark:text-white font-sans font-medium">Used 1-Ton Half-ton Bakkie</td>
+                      <td className="py-2">1 unit</td>
+                      <td className="py-2 text-slate-500">Asset Finance (Wesbank)</td>
+                      <td className="py-2 text-right">{formatMoney(160000)}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 text-slate-900 dark:text-white font-sans font-medium">Commercial Cargo Scooters</td>
+                      <td className="py-2">3 units</td>
+                      <td className="py-2 text-slate-500">Cash (Founder Equity)</td>
+                      <td className="py-2 text-right">{formatMoney(84000)}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 text-slate-900 dark:text-white font-sans font-medium">GPS Dispatch & Mobile Barcode Scanners</td>
+                      <td className="py-2">4 devices</td>
+                      <td className="py-2 text-slate-500">Working Capital</td>
+                      <td className="py-2 text-right">{formatMoney(26000)}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 text-slate-900 dark:text-white font-sans font-medium">Depot Fit-Out & Security Inverter</td>
+                      <td className="py-2">1 facility</td>
+                      <td className="py-2 text-slate-500">Working Capital</td>
+                      <td className="py-2 text-right">{formatMoney(40000)}</td>
+                    </tr>
+                    <tr className="font-bold text-slate-900 dark:text-white">
+                      <td className="py-2 pt-3 font-sans">Total Capex + Working Reserve</td>
+                      <td className="py-2 pt-3">—</td>
+                      <td className="py-2 pt-3">—</td>
+                      <td className="py-2 pt-3 text-right text-emerald-600">{formatMoney(350000)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* CHAPTER 4 */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden transition-all duration-200 shadow-xs">
+            <button
+              type="button"
+              onClick={() => toggleChapter(4)}
+              className="print-keep w-full p-4 sm:p-5 flex items-center justify-between text-left cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+            >
+              <div className="flex items-center gap-3.5 pr-2">
+                <span className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center justify-center shrink-0 font-mono">
+                  04
+                </span>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                    3-Year Projected Income Statement (P&L)
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+                    Audited P&L: Year 1 {formatMoney(year1Rev)} &rarr; Year 2 {formatMoney(year2Rev)} &rarr; Year 3 {formatMoney(year3Rev)}
+                  </p>
+                </div>
+              </div>
+              <ChevronDown className={`chevron-indicator print-hide w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200 ${openChapter === 4 ? 'rotate-180' : ''}`} />
+            </button>
+
+            <div className={`p-5 pt-1 border-t border-slate-100 dark:border-slate-800 space-y-3 text-xs ${openChapter === 4 ? 'block animate-fade-in' : 'hidden print-show print:block'}`}>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left font-mono">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-400 uppercase text-[10px]">
+                      <th className="py-2">Line Item</th>
+                      <th className="py-2 text-right">Year 1</th>
+                      <th className="py-2 text-right">Year 2</th>
+                      <th className="py-2 text-right">Year 3</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+                    <tr className="font-bold text-slate-900 dark:text-white">
+                      <td className="py-2">Gross Revenue</td>
+                      <td className="py-2 text-right text-emerald-600">{formatMoney(year1Rev)}</td>
+                      <td className="py-2 text-right text-emerald-600">{formatMoney(year2Rev)}</td>
+                      <td className="py-2 text-right text-emerald-600">{formatMoney(year3Rev)}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2">Cost of Goods Sold (Fuel & Driver Share)</td>
+                      <td className="py-2 text-right text-slate-500">({formatMoney(year1Cogs)})</td>
+                      <td className="py-2 text-right text-slate-500">({formatMoney(year2Cogs)})</td>
+                      <td className="py-2 text-right text-slate-500">({formatMoney(year3Cogs)})</td>
+                    </tr>
+                    <tr className="font-semibold text-slate-900 dark:text-white bg-slate-50/50 dark:bg-slate-800/30">
+                      <td className="py-2">Gross Profit (Margin)</td>
+                      <td className="py-2 text-right">{formatMoney(year1Gross)}</td>
+                      <td className="py-2 text-right">{formatMoney(year2Gross)}</td>
+                      <td className="py-2 text-right">{formatMoney(year3Gross)}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2">Operating Expenses (Rent, Insurance, Telco)</td>
+                      <td className="py-2 text-right text-slate-500">({formatMoney(year1Opex)})</td>
+                      <td className="py-2 text-right text-slate-500">({formatMoney(year2Opex)})</td>
+                      <td className="py-2 text-right text-slate-500">({formatMoney(year3Opex)})</td>
+                    </tr>
+                    <tr className="font-semibold text-slate-900 dark:text-white">
+                      <td className="py-2">EBITDA</td>
+                      <td className="py-2 text-right">{formatMoney(year1Ebitda)}</td>
+                      <td className="py-2 text-right">{formatMoney(year2Ebitda)}</td>
+                      <td className="py-2 text-right">{formatMoney(year3Ebitda)}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2">Depreciation & Interest Expense</td>
+                      <td className="py-2 text-right text-slate-500">({formatMoney(year1Depr + year1Interest)})</td>
+                      <td className="py-2 text-right text-slate-500">({formatMoney(year2Depr + year2Interest)})</td>
+                      <td className="py-2 text-right text-slate-500">({formatMoney(year3Depr + year3Interest)})</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2">Tax Provision (SBC Rates 12%)</td>
+                      <td className="py-2 text-right text-slate-500">({formatMoney(year1Tax)})</td>
+                      <td className="py-2 text-right text-slate-500">({formatMoney(year2Tax)})</td>
+                      <td className="py-2 text-right text-slate-500">({formatMoney(year3Tax)})</td>
+                    </tr>
+                    <tr className="font-bold text-slate-900 dark:text-white bg-emerald-50/50 dark:bg-emerald-950/30">
+                      <td className="py-2 text-emerald-800 dark:text-emerald-300">Net Profit After Tax</td>
+                      <td className="py-2 text-right text-emerald-600">{formatMoney(year1Net)}</td>
+                      <td className="py-2 text-right text-emerald-600">{formatMoney(year2Net)}</td>
+                      <td className="py-2 text-right text-emerald-600">{formatMoney(year3Net)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* CHAPTER 5 */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden transition-all duration-200 shadow-xs">
+            <button
+              type="button"
+              onClick={() => toggleChapter(5)}
+              className="print-keep w-full p-4 sm:p-5 flex items-center justify-between text-left cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+            >
+              <div className="flex items-center gap-3.5 pr-2">
+                <span className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center justify-center shrink-0 font-mono">
+                  05
+                </span>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                    12-Month Cash Flow Statement (Year 1)
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+                    Monthly cash inflows vs outflows proving zero liquidity shortfall across all 12 operational months
+                  </p>
+                </div>
+              </div>
+              <ChevronDown className={`chevron-indicator print-hide w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200 ${openChapter === 5 ? 'rotate-180' : ''}`} />
+            </button>
+
+            <div className={`p-5 pt-1 border-t border-slate-100 dark:border-slate-800 space-y-3 text-xs ${openChapter === 5 ? 'block animate-fade-in' : 'hidden print-show print:block'}`}>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left font-mono">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-400 uppercase text-[10px]">
+                      <th className="py-2">Period</th>
+                      <th className="py-2 text-right">Cash Inflows</th>
+                      <th className="py-2 text-right">Cash Outflows</th>
+                      <th className="py-2 text-right">Net Cash</th>
+                      <th className="py-2 text-right">Closing Reserve</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
                     {monthlyCashflow.map((m, idx) => (
-                      <tr key={idx} className={idx % 2 === 0 ? 'bg-slate-50/40 dark:bg-slate-900/40' : ''}>
-                        <td className="py-2 px-3 font-sans font-semibold text-slate-900 dark:text-white">{m.month}</td>
-                        <td className="py-2 px-3 text-right text-emerald-600 font-medium">{formatZAR(m.inflow)}</td>
-                        <td className="py-2 px-3 text-right text-red-500">({formatZAR(m.outflow)})</td>
-                        <td className="py-2 px-3 text-right font-bold text-slate-900 dark:text-white">+{formatZAR(m.net)}</td>
-                        <td className="py-2 px-3 text-right font-bold text-emerald-700 dark:text-emerald-400">{formatZAR(m.balance)}</td>
+                      <tr key={idx}>
+                        <td className="py-1.5 font-sans font-medium">{m.month}</td>
+                        <td className="py-1.5 text-right">{formatMoney(m.inflow)}</td>
+                        <td className="py-1.5 text-right text-slate-500">{formatMoney(m.outflow)}</td>
+                        <td className="py-1.5 text-right text-emerald-600 font-semibold">+{formatMoney(m.net)}</td>
+                        <td className="py-1.5 text-right font-bold text-slate-900 dark:text-white">{formatMoney(m.balance)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -651,90 +470,63 @@ Net Profit After Tax         R199,400 (10.8%)   R493,600 (16.6%)   R839,000 (18.
               </div>
             </div>
           </div>
-        )}
 
-        {/* TAB 5: BREAK-EVEN & FINANCIAL RATIOS */}
-        {activeTab === 'ratios' && (
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-6 shadow-xs">
-            <div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                Break-Even Thresholds & Key Credit Ratios
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Metrics required by commercial bank credit analysts and development finance institutions.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Monthly Break-Even Turnover</span>
-                <div className="text-2xl font-extrabold text-slate-900 dark:text-white font-mono">R103,400</div>
-                <div className="text-[11px] text-emerald-600 font-medium">Equal to 23 weekly distribution trips</div>
-              </div>
-
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Debt Service Coverage (DSCR)</span>
-                <div className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">3.8x</div>
-                <div className="text-[11px] text-slate-500">Bank threshold: &ge; 1.25x</div>
-              </div>
-
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Current Ratio (Liquidity)</span>
-                <div className="text-2xl font-extrabold text-slate-900 dark:text-white font-mono">2.1x</div>
-                <div className="text-[11px] text-slate-500">Benchmark: &ge; 1.5x</div>
-              </div>
-
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Capital Payback Period</span>
-                <div className="text-2xl font-extrabold text-slate-900 dark:text-white font-mono">19 Months</div>
-                <div className="text-[11px] text-emerald-600 font-medium">Rapid asset recoupment</div>
-              </div>
-            </div>
-
-            <div className="p-5 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
-              <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                How South African Commercial Banks Interpret These Ratios:
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+          {/* CHAPTER 6 */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden transition-all duration-200 shadow-xs">
+            <button
+              type="button"
+              onClick={() => toggleChapter(6)}
+              className="print-keep w-full p-4 sm:p-5 flex items-center justify-between text-left cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+            >
+              <div className="flex items-center gap-3.5 pr-2">
+                <span className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center justify-center shrink-0 font-mono">
+                  06
+                </span>
                 <div>
-                  <strong className="text-slate-900 dark:text-white">1. Debt Service Coverage (DSCR):</strong> At 3.8x, the company generates R3.80 of operational cash for every R1.00 of required bank loan principal and interest repayment. This low default probability qualifies the company for favorable prime-linked lending rates.
-                </div>
-                <div>
-                  <strong className="text-slate-900 dark:text-white">2. SARS Small Business Corporation (SBC):</strong> By keeping taxable income within SBC thresholds (Section 12E), the company saves over R48,000 in early-stage income taxes compared to standard corporate rates, preserving cash inside the operating float.
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                    Break-Even Analysis & Commercial Financial Ratios
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+                    Monthly break-even volume of 1,157 deliveries (38.6/day) · Current ratio 2.1x · Debt service coverage 3.4x
+                  </p>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
+              <ChevronDown className={`chevron-indicator print-hide w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200 ${openChapter === 6 ? 'rotate-180' : ''}`} />
+            </button>
 
-        {/* TAB 6: FULL TEXT DOCUMENT VIEW */}
-        {activeTab === 'fulltext' && (
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-4 shadow-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                  Full Document Text & Formatted Blueprint
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Ready to copy directly into Microsoft Word, Google Docs, or export to PDF for submission.
-                </p>
+            <div className={`p-5 pt-1 border-t border-slate-100 dark:border-slate-800 space-y-4 text-xs text-slate-700 dark:text-slate-300 ${openChapter === 6 ? 'block animate-fade-in' : 'hidden print-show print:block'}`}>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Monthly Fixed Costs</span>
+                  <span className="text-base font-bold font-mono text-slate-900 dark:text-white mt-1 block">{formatMoney(48666)}</span>
+                  <span className="text-[11px] text-slate-500">Rent, basic salaries, insurance, comms</span>
+                </div>
+                <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Contribution Margin / Drop</span>
+                  <span className="text-base font-bold font-mono text-slate-900 dark:text-white mt-1 block">{formatMoney(42.50, 2)}</span>
+                  <span className="text-[11px] text-slate-500">R85 avg price minus R42.50 variable cost</span>
+                </div>
+                <div className="p-4 bg-emerald-50/60 dark:bg-emerald-950/30 rounded-xl border border-emerald-200 dark:border-emerald-800/60">
+                  <span className="text-[10px] text-emerald-800 dark:text-emerald-300 uppercase font-bold block">Daily Break-Even Runs</span>
+                  <span className="text-base font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-1 block">38.6 Drops/Day</span>
+                  <span className="text-[11px] text-slate-500">Crossed by Month 3 of trading</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
+
+              <div className="pt-2 flex items-center justify-between">
+                <span className="font-semibold text-slate-900 dark:text-white">Bank Credit Metrics:</span>
                 <button
-                  onClick={handleCopy}
-                  className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                  onClick={handleCopyFullPlan}
+                  className="print-hide inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 cursor-pointer"
                 >
                   {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copied ? 'Copied!' : 'Copy Document'}</span>
+                  <span>{copied ? 'Copied Full Model!' : 'Copy Key Model Summary'}</span>
                 </button>
               </div>
             </div>
-
-            <pre className="p-4 sm:p-6 bg-slate-900 text-emerald-400 rounded-xl text-[11px] sm:text-xs font-mono overflow-x-auto leading-relaxed whitespace-pre-wrap selection:bg-emerald-600 selection:text-white">
-              {fullPlanText}
-            </pre>
           </div>
-        )}
+
+        </div>
 
       </div>
     </section>

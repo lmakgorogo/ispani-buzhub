@@ -23,3 +23,93 @@ code, kbd, samp, pre, .font-mono {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+/* High-Fidelity Print & Save-as-PDF Stylesheet */
+@media print {
+  @page {
+    margin: 1.5cm;
+    size: A4 portrait;
+  }
+
+  /* Hide interactive, navigation, and floating UI controls */
+  header, 
+  footer, 
+  nav, 
+  .no-print,
+  input,
+  select,
+  .sticky,
+  .fixed,
+  button:not(.print-keep),
+  .print-hide {
+    display: none !important;
+  }
+
+  /* Specific section isolation when triggered via Print / Save Section PDF */
+  body.print-section-business-plan main > *:not(#business-plan) {
+    display: none !important;
+  }
+
+  body.print-section-business-profile main > *:not(#business-profile) {
+    display: none !important;
+  }
+
+  body.print-section-audit main > *:not(#audit) {
+    display: none !important;
+  }
+
+  body.print-section-affidavit main > *:not(#affidavit) {
+    display: none !important;
+  }
+
+  /* Reset canvas background to clean white and text to high-contrast dark */
+  html, body, #root, main, section, div, table, tr, td, th {
+    background-color: #ffffff !important;
+    background-image: none !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Keep borders crisp and visible for tables and cards */
+  .border, .border-b, .border-t, .divide-y > * {
+    border-color: #cbd5e1 !important;
+  }
+
+  /* Keep accordion headers visible and styled in print */
+  button.print-keep {
+    display: flex !important;
+    width: 100% !important;
+    cursor: default !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 12px 16px !important;
+  }
+
+  button.print-keep svg.chevron-indicator {
+    display: none !important;
+  }
+
+  /* Reveal all accordion chapters in print view */
+  .print-show {
+    display: block !important;
+  }
+
+  /* Avoid awkward page breaks inside content cards, tables, and charts */
+  section, article, .rounded-2xl, .rounded-xl, table, tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Ensure links display their text cleanly */
+  a {
+    text-decoration: underline !important;
+    color: #0f172a !important;
+  }
+
+  /* Full width tables without overflow clipping */
+  table {
+    width: 100% !important;
+    table-layout: auto !important;
+  }
+}

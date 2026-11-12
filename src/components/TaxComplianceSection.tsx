@@ -2,11 +2,129 @@ import React, { useState } from 'react';
 import { TAX_OBLIGATIONS } from '../data/businessData';
 import { 
   Receipt, Calculator, ShieldCheck, AlertCircle, 
-  Clock, DollarSign, Percent, ArrowRight, FileCheck 
+  Clock, DollarSign, Percent, ArrowRight, FileCheck, 
+  ExternalLink, ChevronRight, X, Briefcase, AlertTriangle, 
+  CheckCircle2, Sparkles 
 } from 'lucide-react';
+import { useCurrency } from '../context/CurrencyContext';
+
+interface IndustryLicence {
+  id: string;
+  title: string;
+  badge: string;
+  summary: string;
+  cost: string;
+  forms: string;
+  authority: string;
+  penalties: string;
+  officialUrl: string;
+  actionText: string;
+}
+
+const INDUSTRY_LICENCES: IndustryLicence[] = [
+  {
+    id: 'food_spaza',
+    title: 'Food, Catering & Spaza Shops',
+    badge: 'Certificate of Acceptability (COA) · Reg R638',
+    summary: 'Mandatory municipal health inspection certificate required before storing, preparing, or retailing food to the public.',
+    cost: 'R0 - R500 (Municipal fee)',
+    forms: 'Regulation R638 Application Form + Municipal Business Trading Permit',
+    authority: 'Local Municipality Environmental Health Services & Dept of Health',
+    penalties: 'Immediate health shutdown order, stock confiscation, and statutory fines under Foodstuffs, Cosmetics and Disinfectants Act 54 of 1972.',
+    officialUrl: 'https://www.gov.za/services/certificates-licences-permits/certificate-acceptability-food-premises',
+    actionText: 'Municipal COA Guidelines'
+  },
+  {
+    id: 'hair_beauty',
+    title: 'Hair Salons, Barbers & Nail Studios',
+    badge: 'HCSBC Registration · Bargaining Council',
+    summary: 'Statutory bargaining council registration governing minimum wage compliance, chair-rental agreements, and sanitary standards.',
+    cost: 'R150 - R350/mo council levies',
+    forms: 'HCSBC Annexure A Establishment Registration + Trade Qualifications',
+    authority: 'National Bargaining Council for Hairdressing & Cosmetology (HCSBC)',
+    penalties: 'Compliance orders, sheriff asset attachment, and Labour Court default awards under Labour Relations Act 66 of 1995.',
+    officialUrl: 'https://www.hcsbc.co.za',
+    actionText: 'Register on HCSBC Portal'
+  },
+  {
+    id: 'construction',
+    title: 'Construction & Civil Contractors',
+    badge: 'CIDB Grading 1-9 · NHBRC · COIDA',
+    summary: 'Compulsory contractor grading to bid on state/municipal tenders, plus NHBRC home warranty and workers compensation.',
+    cost: 'R450 to R5,000+ (Grades 1 to 9)',
+    forms: 'CIDB Form 1-B, NHBRC Registration, Compensation Fund W.As.8 Return',
+    authority: 'Construction Industry Development Board (CIDB) & NHBRC',
+    penalties: 'Disqualification from public tenders; criminal fines up to R25,000 or 1 year jail under Housing Consumers Protection Measures Act.',
+    officialUrl: 'https://www.cidb.org.za',
+    actionText: 'Apply for CIDB Grade'
+  },
+  {
+    id: 'auto_mechanic',
+    title: 'Auto Mechanics, Workshops & Panel Beaters',
+    badge: 'MIBCO · Environmental Waste Oil (ROSE)',
+    summary: 'Mandatory motor industry bargaining council compliance and hazardous used-oil disposal tracking.',
+    cost: 'Council levies + Free ROSE oil registration',
+    forms: 'MIBCO ER1 Form, Hazardous Waste Consignment Notes, Fire Safety Permit',
+    authority: 'Motor Industry Bargaining Council (MIBCO) & ROSE Foundation',
+    penalties: 'Statutory compliance orders; up to R10,000,000 environmental fines under NEMWA for improper engine oil disposal.',
+    officialUrl: 'https://www.mibco.org.za',
+    actionText: 'MIBCO Registration Guide'
+  },
+  {
+    id: 'carpentry',
+    title: 'Carpentry, Joinery & Furniture Makers',
+    badge: 'FP&M SETA · OHSA Workplace Safety',
+    summary: 'Wood and paper sector skills compliance, industrial zoning consent, and machine operator safety standards.',
+    cost: 'Free SETA accreditation; municipal zoning permit',
+    forms: 'FP&M SETA Workplace Skills Plan (WSP), OHSA Saw Safety Protocol',
+    authority: 'Fibre Processing and Manufacturing SETA (FP&M SETA) & Dept of Labour',
+    penalties: 'Department of Labour stop-work prohibition notices for unguarded machinery or lack of dust extraction systems.',
+    officialUrl: 'https://fpmseta.org.za',
+    actionText: 'FP&M SETA Portal'
+  },
+  {
+    id: 'influencer',
+    title: 'Social Media Influencers & Content Creators',
+    badge: 'ARB #Ad Rules · SARS Barter & AdSense Tax',
+    summary: 'Mandatory commercial disclosure on paid promotions (#Ad) and declaring gifted merchandise, free travel, and YouTube revenue.',
+    cost: 'R0 (Statutory compliance requirement)',
+    forms: 'SARS IRP6 Provisional Tax (Barter goods valued at Fair Market Value)',
+    authority: 'Advertising Regulatory Board (ARB) & SARS',
+    penalties: 'ARB consumer censure, plus up to 200% SARS understatement penalty and back-interest for undeclared commercial gifts.',
+    officialUrl: 'https://arb.org.za',
+    actionText: 'ARB Social Media Code'
+  },
+  {
+    id: 'ai_digital',
+    title: 'AI Agencies, SaaS & Digital Consultancies',
+    badge: 'POPIA Information Officer · PAIA Manual',
+    summary: 'Compulsory registration of an appointed Information Officer with the Information Regulator before processing client personal data.',
+    cost: 'Free registration with Information Regulator',
+    forms: 'Form 1 IO Registration, Section 51 PAIA Manual, Cloud Transfer Addendum',
+    authority: 'The Information Regulator of South Africa',
+    penalties: 'Administrative fines up to R10,000,000 or up to 10 years imprisonment for severe data privacy violations under POPIA.',
+    officialUrl: 'https://inforegulator.org.za',
+    actionText: 'Register Information Officer'
+  },
+  {
+    id: 'network_marketing',
+    title: 'Direct Selling & Network Marketing',
+    badge: 'Consumer Protection Act (Sec 43) · DSA Code',
+    summary: 'Statutory requirements separating legitimate retail network marketing from criminal pyramid schemes.',
+    cost: 'R0 (Compliance with CPA)',
+    forms: 'DSA Member Code of Conduct, Mandatory 14-day 100% Product Buyback Policy',
+    authority: 'National Consumer Commission (NCC) & Direct Selling Association',
+    penalties: 'Pyramid schemes are strictly illegal under CPA Section 43 with criminal prosecution and asset seizure.',
+    officialUrl: 'https://www.dsasa.co.za',
+    actionText: 'DSA Code of Ethics'
+  }
+];
 
 export const TaxComplianceSection: React.FC = () => {
-  const [imageError, setImageError] = useState(false);
+  const { formatMoney } = useCurrency();
+  const [sectionMode, setSectionMode] = useState<'tax' | 'licences'>('tax');
+  const [selectedTax, setSelectedTax] = useState<any | null>(null);
+  const [selectedLicence, setSelectedLicence] = useState<IndustryLicence | null>(null);
   const [calcTab, setCalcTab] = useState<'vat' | 'sbc' | 'turnover' | 'uif'>('vat');
 
   // VAT Calculator states
@@ -45,13 +163,13 @@ export const TaxComplianceSection: React.FC = () => {
     if (turnover <= 500000) return (turnover - 335000) * 0.01;
     if (turnover <= 750000) return 1650 + (turnover - 500000) * 0.02;
     if (turnover <= 1000000) return 6650 + (turnover - 750000) * 0.03;
-    return 6650 + 250000 * 0.03; // over 1m disqualification
+    return 6650 + 250000 * 0.03;
   };
   const turnoverTaxAmount = calculateTurnoverTax(microTurnover);
 
-  // UIF & Employer Deductions states
+  // UIF states
   const [grossSalary, setGrossSalary] = useState<number>(15000);
-  const uifCeiling = 17712; // statutory monthly salary ceiling for UIF
+  const uifCeiling = 17712;
   const uifBase = Math.min(grossSalary, uifCeiling);
   const employeeUif = Math.round(uifBase * 0.01 * 100) / 100;
   const employerUif = Math.round(uifBase * 0.01 * 100) / 100;
@@ -60,382 +178,458 @@ export const TaxComplianceSection: React.FC = () => {
   return (
     <section id="tax" className="py-12 lg:py-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
           <div>
             <div className="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-1">
-              South African Revenue Service (SARS) · Tax Administration Act
+              Statutory Compliance & Licences
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
-              SARS and Tax Compliance
+              SARS Tax Obligations & Industry Licences
             </h2>
             <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-2xl">
-              Fulfilling your tax obligations protects your business against compounding penalties and unlocks essential SARS Tax Compliance Status (TCS) PINs.
+              Understand mandatory tax filing thresholds, SARS TCS verification PINs, and industry-specific commercial operating permits.
             </p>
           </div>
 
           <div className="flex items-center gap-2 self-start md:self-auto text-xs">
-            <span className="text-slate-500 dark:text-slate-400">SARS Portal:</span>
+            <span className="text-slate-500 dark:text-slate-400">SARS eFiling:</span>
             <a
               href="https://sarsefiling.co.za"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
+              className="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
             >
               <span>sarsefiling.co.za</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ExternalLink className="w-3.5 h-3.5" />
             </a>
           </div>
         </div>
 
-        {/* 2-Column Split: Editorial Photo & Core Cards + Interactive Tax Calculator */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Column: Editorial Photo & 4 Core Obligation Cards */}
-          <div className="lg:col-span-6 space-y-6">
-            {/* Visual Photo Slot */}
-            <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm bg-slate-100 dark:bg-slate-800 aspect-[16/10]">
-              {!imageError ? (
-                <img
-                  src="/src/assets/images/sars_tax_compliance_1794134851949.jpg"
-                  alt="SARS tax compliance records, invoices, and accounting desk in South Africa"
-                  referrerPolicy="no-referrer"
-                  onError={() => setImageError(true)}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-slate-100 dark:bg-slate-800">
-                  <Receipt className="w-10 h-10 text-emerald-600 mb-2" />
-                  <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">SARS Compliance Management</p>
+        {/* Toggle Switch between "SARS Tax Obligations" and "Industry & Hustle Licences" */}
+        <div className="flex items-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-xl max-w-fit mb-8 text-xs font-semibold">
+          <button
+            onClick={() => setSectionMode('tax')}
+            className={`px-4 py-2 rounded-lg transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+              sectionMode === 'tax'
+                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <Receipt className="w-4 h-4 text-emerald-600" />
+            <span>SARS Tax Obligations ({TAX_OBLIGATIONS.length})</span>
+          </button>
+
+          <button
+            onClick={() => setSectionMode('licences')}
+            className={`px-4 py-2 rounded-lg transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+              sectionMode === 'licences'
+                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <Briefcase className="w-4 h-4 text-emerald-600" />
+            <span>Industry & Hustle Licences ({INDUSTRY_LICENCES.length})</span>
+          </button>
+        </div>
+
+        {/* VIEW A: SARS Tax Obligations (Compact Cards) */}
+        {sectionMode === 'tax' && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start animate-fade-in">
+            {/* Left 6-col: 4 Core Tax Cards (Strict 3-Second Scan Rule) */}
+            <div className="lg:col-span-7 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {TAX_OBLIGATIONS.map((tax) => (
+                  <div
+                    key={tax.id}
+                    className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between hover:shadow-xs group"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-emerald-600 transition-colors">
+                          {tax.name}
+                        </h4>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold shrink-0">
+                          {tax.rate.split('(')[0].trim()}
+                        </span>
+                      </div>
+
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                        {tax.frequency}
+                      </div>
+
+                      <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
+                        {tax.description}
+                      </p>
+                    </div>
+
+                    <div className="pt-3 mt-3 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedTax(tax)}
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 cursor-pointer"
+                      >
+                        <span>View Forms & Penalties</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right 5-col: Interactive SARS Multi-Calculator */}
+            <div className="lg:col-span-5 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
+                <div className="flex items-center gap-2">
+                  <Calculator className="w-4 h-4 text-emerald-600" />
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                    SARS Multi-Tax Calculator
+                  </h3>
+                </div>
+              </div>
+
+              {/* Calculator Tab Switcher */}
+              <div className="grid grid-cols-4 gap-1 p-1 bg-slate-200/80 dark:bg-slate-700/60 rounded-xl text-xs font-medium">
+                <button
+                  onClick={() => setCalcTab('vat')}
+                  className={`py-1 rounded-lg text-center transition-colors ${
+                    calcTab === 'vat' ? 'bg-white dark:bg-slate-900 font-bold text-slate-900 dark:text-white shadow-xs' : 'text-slate-600 dark:text-slate-400'
+                  }`}
+                >
+                  VAT (15%)
+                </button>
+                <button
+                  onClick={() => setCalcTab('sbc')}
+                  className={`py-1 rounded-lg text-center transition-colors ${
+                    calcTab === 'sbc' ? 'bg-white dark:bg-slate-900 font-bold text-slate-900 dark:text-white shadow-xs' : 'text-slate-600 dark:text-slate-400'
+                  }`}
+                >
+                  SBC Relief
+                </button>
+                <button
+                  onClick={() => setCalcTab('turnover')}
+                  className={`py-1 rounded-lg text-center transition-colors ${
+                    calcTab === 'turnover' ? 'bg-white dark:bg-slate-900 font-bold text-slate-900 dark:text-white shadow-xs' : 'text-slate-600 dark:text-slate-400'
+                  }`}
+                >
+                  Turnover
+                </button>
+                <button
+                  onClick={() => setCalcTab('uif')}
+                  className={`py-1 rounded-lg text-center transition-colors ${
+                    calcTab === 'uif' ? 'bg-white dark:bg-slate-900 font-bold text-slate-900 dark:text-white shadow-xs' : 'text-slate-600 dark:text-slate-400'
+                  }`}
+                >
+                  UIF (2%)
+                </button>
+              </div>
+
+              {/* Calculator Sub-Views */}
+              {calcTab === 'vat' && (
+                <div className="space-y-3 pt-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-600 dark:text-slate-400 font-medium">Amount to Calculate</span>
+                    <div className="flex gap-2 text-[11px]">
+                      <button
+                        onClick={() => setVatMode('exclusive')}
+                        className={`px-2 py-0.5 rounded cursor-pointer ${vatMode === 'exclusive' ? 'bg-emerald-600 text-white font-bold' : 'text-slate-500'}`}
+                      >
+                        Excl. VAT
+                      </button>
+                      <button
+                        onClick={() => setVatMode('inclusive')}
+                        className={`px-2 py-0.5 rounded cursor-pointer ${vatMode === 'inclusive' ? 'bg-emerald-600 text-white font-bold' : 'text-slate-500'}`}
+                      >
+                        Incl. VAT
+                      </button>
+                    </div>
+                  </div>
+                  <input
+                    type="number"
+                    value={vatInput}
+                    onChange={(e) => setVatInput(Number(e.target.value) || 0)}
+                    className="w-full px-3 py-2 text-xs font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl"
+                  />
+                  <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1.5 font-mono">
+                    <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                      <span>Net Amount:</span>
+                      <span>{formatMoney(vatNet, 2)}</span>
+                    </div>
+                    <div className="flex justify-between text-emerald-600 font-semibold">
+                      <span>VAT @ 15%:</span>
+                      <span>{formatMoney(vatAmount, 2)}</span>
+                    </div>
+                    <div className="flex justify-between font-bold text-slate-900 dark:text-white pt-1 border-t border-slate-100 dark:border-slate-800">
+                      <span>Gross Total:</span>
+                      <span>{formatMoney(vatTotal, 2)}</span>
+                    </div>
+                  </div>
                 </div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-4">
-                <div className="text-white text-xs">
-                  <div className="font-semibold">7-Year Statutory Record Keeping Mandate</div>
-                  <div className="text-[11px] text-slate-300">Section 29 of Tax Administration Act No. 28 of 2011</div>
-                </div>
-              </div>
-            </div>
 
-            {/* Core Tax Obligations Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {TAX_OBLIGATIONS.slice(0, 4).map((tax) => (
-                <div
-                  key={tax.id}
-                  className="p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2 flex flex-col justify-between"
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-bold text-xs text-slate-900 dark:text-white">
-                        {tax.name}
-                      </h3>
-                      <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
-                        {tax.formName}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-400 line-clamp-3">
-                      {tax.description}
-                    </p>
+              {calcTab === 'sbc' && (
+                <div className="space-y-3 pt-2 text-xs">
+                  <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                    <span>Taxable Annual Profit:</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-white">{formatMoney(sbcTaxableProfit)}</span>
                   </div>
-                  <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/60 space-y-1.5 text-[11px]">
-                    <div className="text-slate-500">
-                      <strong className="text-slate-700 dark:text-slate-300">Threshold:</strong> {tax.threshold}
+                  <input
+                    type="range"
+                    min="50000"
+                    max="1000000"
+                    step="25000"
+                    value={sbcTaxableProfit}
+                    onChange={(e) => setSbcTaxableProfit(Number(e.target.value))}
+                    className="w-full accent-emerald-600 cursor-pointer"
+                  />
+                  <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1.5 font-mono">
+                    <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                      <span>Standard CIT (27%):</span>
+                      <span>{formatMoney(standardCitTax)}</span>
                     </div>
-                    <div className="flex items-center justify-between pt-1">
-                      <span className="text-slate-500">
-                        <strong className="text-slate-700 dark:text-slate-300">Rate:</strong> {tax.rate}
-                      </span>
-                      {tax.officialUrl && (
-                        <a
-                          href={tax.officialUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[10px] text-emerald-600 dark:text-emerald-400 hover:underline font-semibold"
-                        >
-                          SARS Guide &rarr;
-                        </a>
-                      )}
+                    <div className="flex justify-between text-emerald-600 font-semibold">
+                      <span>SBC Relief Tax:</span>
+                      <span>{formatMoney(sbcTax)}</span>
+                    </div>
+                    <div className="flex justify-between font-bold text-emerald-700 dark:text-emerald-400 pt-1 border-t border-slate-100 dark:border-slate-800">
+                      <span>Estimated Annual Tax Savings:</span>
+                      <span>{formatMoney(sbcSavings)}</span>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              )}
 
-            {/* Statutory Record Keeping Callout (Clean, hairline border, no thick left border) */}
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 flex items-start gap-3">
-              <FileCheck className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-              <div className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-                <strong className="text-slate-900 dark:text-white block mb-0.5">SARS 7-Year Record Keeping Rule</strong>
-                Under the Tax Administration Act, you must retain all invoices, ledgers, bank statements, asset registers, and payroll records in their original form (or tamper-proof digital format) for a minimum of <strong>7 years</strong> from the date of return submission.
-              </div>
+              {calcTab === 'turnover' && (
+                <div className="space-y-3 pt-2 text-xs">
+                  <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                    <span>Gross Annual Turnover (Max R1M):</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-white">{formatMoney(microTurnover)}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="100000"
+                    max="1000000"
+                    step="20000"
+                    value={microTurnover}
+                    onChange={(e) => setMicroTurnover(Number(e.target.value))}
+                    className="w-full accent-emerald-600 cursor-pointer"
+                  />
+                  <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1.5 font-mono">
+                    <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                      <span>Exempt Threshold:</span>
+                      <span>First {formatMoney(335000)} = R0 Tax</span>
+                    </div>
+                    <div className="flex justify-between font-bold text-emerald-700 dark:text-emerald-400 pt-1 border-t border-slate-100 dark:border-slate-800">
+                      <span>Total Turnover Tax:</span>
+                      <span>{formatMoney(turnoverTaxAmount)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {calcTab === 'uif' && (
+                <div className="space-y-3 pt-2 text-xs">
+                  <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                    <span>Gross Monthly Worker Salary:</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-white">{formatMoney(grossSalary)}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="4000"
+                    max="30000"
+                    step="1000"
+                    value={grossSalary}
+                    onChange={(e) => setGrossSalary(Number(e.target.value))}
+                    className="w-full accent-emerald-600 cursor-pointer"
+                  />
+                  <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1.5 font-mono">
+                    <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                      <span>Employee Deduction (1%):</span>
+                      <span>{formatMoney(employeeUif, 2)}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                      <span>Employer Contribution (1%):</span>
+                      <span>{formatMoney(employerUif, 2)}</span>
+                    </div>
+                    <div className="flex justify-between font-bold text-emerald-700 dark:text-emerald-400 pt-1 border-t border-slate-100 dark:border-slate-800">
+                      <span>Total Monthly UIF Remittance:</span>
+                      <span>{formatMoney(totalUif, 2)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
+        )}
 
-          {/* Right Column: Interactive South African Tax Calculator */}
-          <div className="lg:col-span-6 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-700">
-              <div className="flex items-center gap-2">
-                <Calculator className="w-4 h-4 text-emerald-600" />
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                  South African Tax & Deductions Calculator
-                </h3>
-              </div>
-              <span className="text-[11px] text-slate-500 font-mono tabular-nums">SARS 2025/2026</span>
-            </div>
-
-            {/* Segmented Control for Calculator Modes */}
-            <div className="flex items-center gap-1 p-1 bg-slate-200/80 dark:bg-slate-800 rounded-lg mt-4 text-xs font-medium">
-              <button
-                onClick={() => setCalcTab('vat')}
-                className={`flex-1 py-1.5 px-2 rounded-md transition-colors text-center whitespace-nowrap ${
-                  calcTab === 'vat'
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                }`}
+        {/* VIEW B: Industry & Hustle Licences (8 Categories) */}
+        {sectionMode === 'licences' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in">
+            {INDUSTRY_LICENCES.map((licence) => (
+              <div
+                key={licence.id}
+                className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-all hover:shadow-xs group cursor-pointer"
+                onClick={() => setSelectedLicence(licence)}
               >
-                VAT (15%)
-              </button>
-              <button
-                onClick={() => setCalcTab('sbc')}
-                className={`flex-1 py-1.5 px-2 rounded-md transition-colors text-center whitespace-nowrap ${
-                  calcTab === 'sbc'
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                }`}
-              >
-                SBC vs CIT (27%)
-              </button>
-              <button
-                onClick={() => setCalcTab('turnover')}
-                className={`flex-1 py-1.5 px-2 rounded-md transition-colors text-center whitespace-nowrap ${
-                  calcTab === 'turnover'
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                }`}
-              >
-                Turnover Tax
-              </button>
-              <button
-                onClick={() => setCalcTab('uif')}
-                className={`flex-1 py-1.5 px-2 rounded-md transition-colors text-center whitespace-nowrap ${
-                  calcTab === 'uif'
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                }`}
-              >
-                UIF / Employer
-              </button>
-            </div>
+                <div className="space-y-2">
+                  {/* Data Point 1: Title */}
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 transition-colors">
+                    {licence.title}
+                  </h3>
 
-            {/* Tab 1: VAT Calculator */}
-            {calcTab === 'vat' && (
-              <div className="mt-5 space-y-4 text-xs">
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setVatMode('exclusive')}
-                    className={`flex-1 py-2 rounded-lg border text-xs font-medium transition-colors ${
-                      vatMode === 'exclusive'
-                        ? 'border-emerald-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                        : 'border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400'
-                    }`}
-                  >
-                    Add 15% VAT (Exclusive)
-                  </button>
-                  <button
-                    onClick={() => setVatMode('inclusive')}
-                    className={`flex-1 py-2 rounded-lg border text-xs font-medium transition-colors ${
-                      vatMode === 'inclusive'
-                        ? 'border-emerald-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                        : 'border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400'
-                    }`}
-                  >
-                    Extract 15% VAT (Inclusive)
-                  </button>
+                  {/* Data Point 2: Cost / Compliance Badge */}
+                  <span className="inline-block px-2 py-0.5 rounded-md bg-emerald-100/70 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-semibold text-[10px]">
+                    {licence.badge}
+                  </span>
+
+                  {/* Data Point 3: 1-Sentence Summary */}
+                  <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
+                    {licence.summary}
+                  </p>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-slate-600 dark:text-slate-400 block font-medium">
-                    {vatMode === 'exclusive' ? 'Amount (Excluding VAT)' : 'Total Invoice Amount (Including VAT)'}
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-2 text-slate-400 font-mono">R</span>
-                    <input
-                      type="number"
-                      value={vatInput}
-                      onChange={(e) => setVatInput(Number(e.target.value) || 0)}
-                      className="w-full pl-8 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white font-mono tabular-nums text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                    />
-                  </div>
-                </div>
-
-                {/* Calculation breakdown */}
-                <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2.5">
-                  <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
-                    <span>Net Amount (Excl. VAT):</span>
-                    <span className="font-mono tabular-nums text-slate-900 dark:text-white font-medium">
-                      R{vatNet.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-emerald-600 dark:text-emerald-400 font-semibold">
-                    <span>15% VAT Output/Input:</span>
-                    <span className="font-mono tabular-nums">
-                      R{vatAmount.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-slate-900 dark:text-white font-bold text-sm">
-                    <span>Gross Total (Incl. VAT):</span>
-                    <span className="font-mono tabular-nums">
-                      R{vatTotal.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="text-[11px] text-slate-500 leading-relaxed">
-                  <strong>Threshold Note:</strong> Registration is compulsory if turnover exceeds R1,000,000 in 12 months. Voluntary registration is permitted once turnover exceeds R50,000.
-                </div>
-              </div>
-            )}
-
-            {/* Tab 2: SBC vs CIT Calculator */}
-            {calcTab === 'sbc' && (
-              <div className="mt-5 space-y-4 text-xs">
-                <div className="space-y-1.5">
-                  <label className="text-slate-600 dark:text-slate-400 block font-medium">
-                    Projected Annual Taxable Profit (After deductions)
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-2 text-slate-400 font-mono">R</span>
-                    <input
-                      type="number"
-                      value={sbcTaxableProfit}
-                      onChange={(e) => setSbcTaxableProfit(Number(e.target.value) || 0)}
-                      className="w-full pl-8 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white font-mono tabular-nums text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-1">
-                    <span className="text-[11px] text-slate-500 block">Standard 27% CIT</span>
-                    <span className="text-sm font-bold font-mono tabular-nums text-slate-900 dark:text-white block">
-                      R{Math.round(standardCitTax).toLocaleString('en-ZA')}
-                    </span>
-                    <span className="text-[10px] text-slate-400 block">Flat corporate tax rate</span>
-                  </div>
-
-                  <div className="p-3.5 bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-xl space-y-1">
-                    <span className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium block">SBC Relief Tax</span>
-                    <span className="text-sm font-bold font-mono tabular-nums text-emerald-700 dark:text-emerald-300 block">
-                      R{Math.round(sbcTax).toLocaleString('en-ZA')}
-                    </span>
-                    <span className="text-[10px] text-emerald-600/80 block">0% up to R95,750</span>
-                  </div>
-                </div>
-
-                <div className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl flex items-center justify-between">
-                  <span className="font-semibold text-slate-900 dark:text-white">Annual Tax Savings with SBC:</span>
-                  <span className="text-sm font-bold font-mono tabular-nums text-emerald-600 dark:text-emerald-400">
-                    R{Math.round(sbcSavings).toLocaleString('en-ZA')}
+                <div className="pt-3 mt-3 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between text-xs">
+                  <span className="text-[11px] text-slate-400 font-medium">{licence.cost}</span>
+                  <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
+                    <span>View Rules</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
                   </span>
                 </div>
-
-                <div className="text-[11px] text-slate-500 leading-relaxed">
-                  <strong>SBC Qualification Criteria:</strong> Gross turnover must not exceed R20 million; shareholders must be natural persons holding no shares in other private companies; investment income & professional services must not exceed 20% of total receipts.
-                </div>
               </div>
-            )}
+            ))}
+          </div>
+        )}
 
-            {/* Tab 3: Turnover Tax */}
-            {calcTab === 'turnover' && (
-              <div className="mt-5 space-y-4 text-xs">
-                <div className="space-y-1.5">
-                  <label className="text-slate-600 dark:text-slate-400 block font-medium">
-                    Annual Gross Turnover (Under R1,000,000)
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-2 text-slate-400 font-mono">R</span>
-                    <input
-                      type="number"
-                      max={1000000}
-                      value={microTurnover}
-                      onChange={(e) => setMicroTurnover(Number(e.target.value) || 0)}
-                      className="w-full pl-8 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white font-mono tabular-nums text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                    />
-                  </div>
-                </div>
+        {/* Detail Modal for Tax Obligations */}
+        {selectedTax && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs transition-opacity animate-fade-in">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative space-y-4">
+              <button
+                onClick={() => setSelectedTax(null)}
+                className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
 
-                <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
-                  <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
-                    <span>Applicable Bracket:</span>
-                    <span className="font-medium text-slate-900 dark:text-white">
-                      {microTurnover <= 335000 && 'R0 - R335,000 (0% Rate)'}
-                      {microTurnover > 335000 && microTurnover <= 500000 && 'R335k - R500k (1% on excess)'}
-                      {microTurnover > 500000 && microTurnover <= 750000 && 'R500k - R750k (R1,650 + 2%)'}
-                      {microTurnover > 750000 && microTurnover <= 1000000 && 'R750k - R1M (R6,650 + 3%)'}
-                      {microTurnover > 1000000 && 'Exceeds R1,000,000 limit'}
-                    </span>
-                  </div>
-
-                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-slate-900 dark:text-white font-bold text-sm">
-                    <span>Estimated Turnover Tax:</span>
-                    <span className="font-mono tabular-nums text-emerald-600 dark:text-emerald-400">
-                      R{Math.round(turnoverTaxAmount).toLocaleString('en-ZA')}
-                    </span>
-                  </div>
-                </div>
-
-                <p className="text-[11px] text-slate-500 leading-relaxed">
-                  Turnover Tax replaces Income Tax, VAT, Provisional Tax, Capital Gains Tax, and Dividends Tax for micro-businesses, simplifying compliance to two interim TT02 payments and one annual TT03 return.
+              <div className="space-y-1">
+                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                  SARS Statutory Filing
+                </span>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                  {selectedTax.name}
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-300">
+                  {selectedTax.description}
                 </p>
               </div>
-            )}
 
-            {/* Tab 4: UIF & Employer Deductions */}
-            {calcTab === 'uif' && (
-              <div className="mt-5 space-y-4 text-xs">
-                <div className="space-y-1.5">
-                  <label className="text-slate-600 dark:text-slate-400 block font-medium">
-                    Employee Monthly Gross Remuneration
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-2 text-slate-400 font-mono">R</span>
-                    <input
-                      type="number"
-                      value={grossSalary}
-                      onChange={(e) => setGrossSalary(Number(e.target.value) || 0)}
-                      className="w-full pl-8 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white font-mono tabular-nums text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                    />
-                  </div>
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
+                <div className="flex justify-between">
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">Tax Threshold:</span>
+                  <span className="text-slate-900 dark:text-white">{selectedTax.threshold}</span>
                 </div>
-
-                <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
-                  <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
-                    <span>1% Employee UIF Withholding (Capped):</span>
-                    <span className="font-mono tabular-nums text-slate-900 dark:text-white font-medium">
-                      R{employeeUif.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
-                    <span>1% Employer UIF Contribution (Capped):</span>
-                    <span className="font-mono tabular-nums text-slate-900 dark:text-white font-medium">
-                      R{employerUif.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-slate-900 dark:text-white font-bold text-sm">
-                    <span>Total Monthly UIF Remittance (EMP201):</span>
-                    <span className="font-mono tabular-nums text-emerald-600 dark:text-emerald-400">
-                      R{totalUif.toFixed(2)}
-                    </span>
-                  </div>
+                <div className="flex justify-between">
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">Statutory Form:</span>
+                  <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">{selectedTax.formName}</span>
                 </div>
-
-                <div className="text-[11px] text-slate-500 leading-relaxed space-y-1">
-                  <div><strong>UIF Ceiling:</strong> Monthly remuneration is capped at R17,712 for UIF calculations (max R177.12 per party).</div>
-                  <div><strong>Payment Due Date:</strong> Remitted to SARS via monthly EMP201 return by the 7th of the following month.</div>
+                <div className="flex justify-between">
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">Filing Schedule:</span>
+                  <span className="text-slate-900 dark:text-white">{selectedTax.frequency}</span>
                 </div>
               </div>
-            )}
+
+              <div className="p-3 bg-rose-50/80 dark:bg-rose-950/20 rounded-xl border border-rose-200 dark:border-rose-900/50 text-xs text-rose-900 dark:text-rose-200">
+                <strong>Statutory Penalties: </strong> {selectedTax.penalties}
+              </div>
+
+              <div className="pt-2 flex items-center justify-between">
+                <a
+                  href={selectedTax.officialUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold"
+                >
+                  <span>Official SARS Page</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+
+                <button
+                  onClick={() => setSelectedTax(null)}
+                  className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Detail Modal for Industry Licences */}
+        {selectedLicence && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs transition-opacity animate-fade-in">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative space-y-4">
+              <button
+                onClick={() => setSelectedLicence(null)}
+                className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="space-y-1">
+                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                  {selectedLicence.badge}
+                </span>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                  {selectedLicence.title}
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-300">
+                  {selectedLicence.summary}
+                </p>
+              </div>
+
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
+                <div>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300 block">Regulatory Authority:</span>
+                  <span className="text-slate-900 dark:text-white">{selectedLicence.authority}</span>
+                </div>
+                <div>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300 block">Required Statutory Forms:</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">{selectedLicence.forms}</span>
+                </div>
+                <div>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300 block">Permit / Compliance Cost:</span>
+                  <span className="text-slate-900 dark:text-white">{selectedLicence.cost}</span>
+                </div>
+              </div>
+
+              <div className="p-3 bg-amber-50/80 dark:bg-amber-950/20 rounded-xl border border-amber-200 dark:border-amber-900/50 text-xs text-amber-900 dark:text-amber-200">
+                <strong>Non-Compliance Penalty: </strong> {selectedLicence.penalties}
+              </div>
+
+              <div className="pt-2 flex items-center justify-between">
+                <a
+                  href={selectedLicence.officialUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold"
+                >
+                  <span>{selectedLicence.actionText}</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+
+                <button
+                  onClick={() => setSelectedLicence(null)}
+                  className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </section>
   );

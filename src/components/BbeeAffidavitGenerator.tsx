@@ -28,7 +28,11 @@ export const BbeeAffidavitGenerator: React.FC = () => {
   const currentTier = tierDetails[selectedTier];
 
   const handlePrint = () => {
+    document.body.classList.add('print-section-affidavit');
     window.print();
+    setTimeout(() => {
+      document.body.classList.remove('print-section-affidavit');
+    }, 1500);
   };
 
   return (
@@ -38,7 +42,7 @@ export const BbeeAffidavitGenerator: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
             <div className="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-1">
-              Broad-Based Black Economic Empowerment · DTIC Codes of Good Practice
+              Broad-Based Black Economic Empowerment · DTIC & CIPC Statutory Guidelines
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
               B-BBEE EME Compliance Guide & Statutory Template
@@ -48,22 +52,25 @@ export const BbeeAffidavitGenerator: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 self-start md:self-auto">
+          <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
+            {/* Direct Official CIPC PDF Download */}
             <a
-              href="https://www.thedtic.gov.za/economic-empowerment/b-bbee/b-bbee-templates/"
+              href="https://www.cipc.co.za/wp-content/uploads/2023/01/Affidavit-EME-Gen.pdf"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg shadow-xs hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-xs transition-colors whitespace-nowrap cursor-pointer"
             >
-              <span>Download DTIC Template</span>
-              <ExternalLink className="w-3.5 h-3.5" />
+              <Download className="w-3.5 h-3.5" />
+              <span>Download Official CIPC Affidavit (PDF)</span>
             </a>
+
+            {/* Print Blank Template */}
             <button
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-500 rounded-lg shadow-xs transition-colors whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg shadow-xs transition-colors whitespace-nowrap cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span>Print Blank Template</span>
+              <span>Print Template</span>
             </button>
           </div>
         </div>
@@ -151,7 +158,16 @@ export const BbeeAffidavitGenerator: React.FC = () => {
                 <span>3-Step Offline Certification Process</span>
               </h4>
               <ol className="text-xs text-slate-600 dark:text-slate-400 space-y-1.5 list-decimal pl-4">
-                <li>Print the standard blank statutory template shown on the right.</li>
+                <li>
+                  <a 
+                    href="https://www.cipc.co.za/wp-content/uploads/2023/01/Affidavit-EME-Gen.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-emerald-600 dark:text-emerald-400 font-semibold underline"
+                  >
+                    Download the official CIPC EME Affidavit (PDF)
+                  </a> or print the statutory template shown on the right.
+                </li>
                 <li>Fill in your company registration number, director name, and ownership percentage with a pen.</li>
                 <li>Bring your original South African ID and CoR14.3 to any SAPS Police Station or Post Office. A Commissioner of Oaths will stamp and sign it at zero cost.</li>
               </ol>

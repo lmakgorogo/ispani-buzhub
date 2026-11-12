@@ -62,7 +62,7 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate, searchQuery, onSearchCha
             <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-slate-500 dark:text-slate-400">
               <span className="font-semibold text-slate-700 dark:text-slate-300">Fast Links:</span>
               <a
-                href="https://bizportal.gov.za"
+                href="https://www.bizportal.gov.za/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-emerald-600 dark:hover:text-emerald-400 underline font-medium"
