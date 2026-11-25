@@ -42,13 +42,45 @@ const BbeeAffidavitGenerator = React.lazy(() =>
 const PrivacyPolicyPage = React.lazy(() =>
   import('./components/PrivacyPolicyPage').then((m) => ({ default: m.PrivacyPolicyPage }))
 );
+const VerifiedVacanciesTab = React.lazy(() =>
+  import('./components/VerifiedVacanciesTab').then((m) => ({ default: m.VerifiedVacanciesTab }))
+);
+const BusinessDirectorySection = React.lazy(() =>
+  import('./components/BusinessDirectorySection').then((m) => ({ default: m.BusinessDirectorySection }))
+);
 
-const VALID_TABS: TabId[] = ['home', 'register', 'compliance', 'funding', 'toolkits', 'privacy'];
+const VALID_TABS: TabId[] = ['home', 'register', 'compliance', 'funding', 'toolkits', 'directory', 'vacancies', 'privacy'];
 
 type ToolkitSubTab = 'plan' | 'profile' | 'links';
 
-function parseHashToTab(hash: string): { tab: TabId; subTab?: ToolkitSubTab } {
-  const clean = hash.replace(/^#/, '').trim().toLowerCase();
+function parseLocationToTab(
+  hash: string,
+  search = '',
+  pathname = ''
+): { tab: TabId; subTab?: ToolkitSubTab; vacancyId?: string } {
+  // Check query parameter first so links like /?vacancy=eol-plus-gd-2026#vacancies work even if hash is stripped
+  if (search) {
+    const params = new URLSearchParams(search);
+    const queryVacancy = params.get('vacancy')?.trim();
+    if (queryVacancy) {
+      return { tab: 'vacancies', vacancyId: queryVacancy };
+    }
+  }
+
+  const rawHash = hash.replace(/^#\/?/, '').trim();
+  const clean = rawHash.toLowerCase();
+
+  // Support #vacancies/<id> or #vacancies?vacancy=<id>
+  if (clean.startsWith('vacancies/')) {
+    const idPart = rawHash.slice('vacancies/'.length).trim();
+    return { tab: 'vacancies', vacancyId: idPart || undefined };
+  }
+  if (clean.startsWith('vacancies?')) {
+    const hashParams = new URLSearchParams(rawHash.slice('vacancies?'.length));
+    const hashVacancy = hashParams.get('vacancy')?.trim();
+    return { tab: 'vacancies', vacancyId: hashVacancy || undefined };
+  }
+
   if (VALID_TABS.includes(clean as TabId)) {
     return { tab: clean as TabId };
   }
@@ -70,23 +102,38 @@ function parseHashToTab(hash: string): { tab: TabId; subTab?: ToolkitSubTab } {
   if (clean === 'external-links') {
     return { tab: 'toolkits', subTab: 'links' };
   }
+
+  // Fallback: support /vacancies or /vacancies/<id> path URLs
+  const cleanPath = pathname.replace(/^\/+|\/+$/g, '');
+  const lowerPath = cleanPath.toLowerCase();
+  if (lowerPath === 'vacancies') {
+    return { tab: 'vacancies' };
+  }
+  if (lowerPath.startsWith('vacancies/')) {
+    const idPart = cleanPath.slice('vacancies/'.length).trim();
+    return { tab: 'vacancies', vacancyId: idPart || undefined };
+  }
+
   return { tab: 'home' };
 }
 
 export default function App() {
-  const [activeTab, setActiveTabState] = useState<TabId>(() => {
-    if (typeof window !== 'undefined' && window.location.hash) {
-      return parseHashToTab(window.location.hash).tab;
-    }
-    return 'home';
-  });
+  const initialRoute =
+    typeof window !== 'undefined'
+      ? parseLocationToTab(
+          window.location.hash,
+          window.location.search,
+          window.location.pathname
+        )
+      : { tab: 'home' as TabId };
 
-  const [toolkitSubTab, setToolkitSubTab] = useState<ToolkitSubTab>(() => {
-    if (typeof window !== 'undefined' && window.location.hash) {
-      return parseHashToTab(window.location.hash).subTab || 'plan';
-    }
-    return 'plan';
-  });
+  const [activeTab, setActiveTabState] = useState<TabId>(initialRoute.tab);
+  const [focusedVacancyId, setFocusedVacancyId] = useState<string | null>(
+    initialRoute.vacancyId || null
+  );
+  const [toolkitSubTab, setToolkitSubTab] = useState<ToolkitSubTab>(
+    initialRoute.subTab || 'plan'
+  );
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -114,26 +161,48 @@ export default function App() {
   // Synchronize activeTab with URL hash and scroll to top on view switch
   const setActiveTab = (tab: TabId) => {
     setActiveTabState(tab);
+    if (tab !== 'vacancies') {
+      setFocusedVacancyId(null);
+    }
     if (typeof window !== 'undefined') {
-      if (window.location.hash !== `#${tab}`) {
-        window.history.pushState(null, '', `#${tab}`);
+      const basePath = window.location.pathname.toLowerCase().startsWith('/vacancies')
+        ? '/'
+        : window.location.pathname;
+      const targetUrl = `${basePath}#${tab}`;
+      if (
+        window.location.hash !== `#${tab}` ||
+        window.location.search ||
+        window.location.pathname !== basePath
+      ) {
+        window.history.pushState(null, '', targetUrl);
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   useEffect(() => {
-    const handleHashChange = () => {
-      const parsed = parseHashToTab(window.location.hash);
+    const handleRouteChange = () => {
+      const parsed = parseLocationToTab(
+        window.location.hash,
+        window.location.search,
+        window.location.pathname
+      );
       setActiveTabState(parsed.tab);
+      setFocusedVacancyId(parsed.vacancyId || null);
       if (parsed.subTab) {
         setToolkitSubTab(parsed.subTab);
       }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (!parsed.vacancyId) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     };
 
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener('hashchange', handleRouteChange);
+    window.addEventListener('popstate', handleRouteChange);
+    return () => {
+      window.removeEventListener('hashchange', handleRouteChange);
+      window.removeEventListener('popstate', handleRouteChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -154,7 +223,7 @@ export default function App() {
   };
 
   const handleFaqNavigate = (sectionOrTab: string) => {
-    const parsed = parseHashToTab(sectionOrTab);
+    const parsed = parseLocationToTab(sectionOrTab);
     if (parsed.subTab) {
       setToolkitSubTab(parsed.subTab);
     }
@@ -210,7 +279,7 @@ export default function App() {
 
   return (
     <CurrencyProvider>
-      <div className="min-h-screen flex flex-col bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-500 selection:text-white transition-colors">
+      <div className="min-h-screen flex flex-col bg-[#FFFFFF] dark:bg-slate-900 text-[#1E293B] dark:text-slate-100 font-sans selection:bg-[#15806B] selection:text-white transition-colors">
         
         {/* Top Desktop & Mobile Sticky Navigation */}
         <Header
@@ -224,8 +293,8 @@ export default function App() {
           <Suspense
             fallback={
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-                <div className="inline-flex items-center gap-3 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300">
-                  <div className="w-4 h-4 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+                <div className="inline-flex items-center gap-3 px-4 py-2.5 rounded-xl bg-[#F8FAFC] dark:bg-slate-800 text-xs font-semibold text-[#1E293B] dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                  <div className="w-4 h-4 border-2 border-[#EAB308] border-t-transparent rounded-full animate-spin" />
                   <span>Loading workspace module...</span>
                 </div>
               </div>
@@ -241,18 +310,18 @@ export default function App() {
                 />
 
                 {/* 4-Card "Where are you in your business journey?" Interactive Grid */}
-                <section className="py-12 lg:py-16 bg-[#0F172A] text-white border-b border-slate-800">
+                <section className="py-12 lg:py-16 bg-[#070B28] text-white border-b-2 border-[#15806B]/60">
                   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
                       <div>
-                        <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#D4AF37] mb-1">
+                        <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#EAB308] mb-1">
                           <Compass className="w-4 h-4" />
                           <span>Interactive Business Roadmap</span>
                         </div>
                         <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                           Where are you in your business journey?
                         </h2>
-                        <p className="text-sm text-slate-300 mt-1 max-w-2xl">
+                        <p className="text-sm text-slate-200 mt-1 max-w-2xl">
                           Select your current stage below to open a focused workspace with calculators, step-by-step checklists, and printable templates.
                         </p>
                       </div>
@@ -265,32 +334,32 @@ export default function App() {
                           <div
                             key={card.id}
                             onClick={() => setActiveTab(card.id)}
-                            className="group bg-[#1E1E24] hover:bg-slate-800/90 border border-slate-700/80 hover:border-[#D4AF37] rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 cursor-pointer shadow-md"
+                            className="group bg-[#0D133D] hover:bg-[#0D133D]/90 border border-slate-800 hover:border-[#EAB308] rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 cursor-pointer shadow-md"
                           >
                             <div className="space-y-3">
                               <div className="flex items-center justify-between gap-2">
-                                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#D4AF37]">
+                                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#EAB308]">
                                   {card.step}
                                 </span>
-                                <span className="px-2 py-0.5 rounded bg-slate-800 text-emerald-400 font-mono text-[10px] font-semibold border border-slate-700">
+                                <span className="px-2 py-0.5 rounded bg-[#15806B]/20 text-emerald-300 font-mono text-[10px] font-semibold border border-[#15806B]/50">
                                   {card.badge}
                                 </span>
                               </div>
 
-                              <div className="w-10 h-10 rounded-xl bg-[#0F172A] border border-slate-700 flex items-center justify-center text-[#D4AF37] group-hover:scale-105 transition-transform">
+                              <div className="w-10 h-10 rounded-xl bg-[#070B28] border border-slate-800 flex items-center justify-center text-[#EAB308] group-hover:scale-105 transition-transform">
                                 <Icon className="w-5 h-5" />
                               </div>
 
-                              <h3 className="text-base font-extrabold text-white group-hover:text-[#D4AF37] transition-colors">
+                              <h3 className="text-base font-extrabold text-white group-hover:text-[#EAB308] transition-colors">
                                 {card.title}
                               </h3>
 
-                              <p className="text-xs text-slate-300 leading-relaxed">
+                              <p className="text-xs text-slate-200 leading-relaxed">
                                 {card.subtitle}
                               </p>
                             </div>
 
-                            <div className="pt-5 mt-4 border-t border-slate-800 flex items-center justify-between text-xs font-bold text-[#D4AF37]">
+                            <div className="pt-5 mt-4 border-t border-slate-800 flex items-center justify-between text-xs font-bold text-[#EAB308]">
                               <span>{card.cta}</span>
                               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </div>
@@ -301,6 +370,8 @@ export default function App() {
                   </div>
                 </section>
 
+                <BusinessDirectorySection />
+
                 <FaqSection onNavigateSection={handleFaqNavigate} />
               </div>
             )}
@@ -309,17 +380,17 @@ export default function App() {
             {activeTab === 'register' && (
               <div>
                 {/* Module Banner */}
-                <div className="bg-[#0F172A] text-white py-8 sm:py-10 border-b border-slate-800 no-print">
+                <div className="bg-[#070B28] text-white py-8 sm:py-10 border-b-2 border-[#15806B] no-print">
                   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="space-y-1">
-                      <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#D4AF37]">
+                      <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#EAB308]">
                         <Building2 className="w-4 h-4" />
                         <span>Module 01 · Formalization &amp; CIPC Incorporation</span>
                       </div>
                       <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
                         Start &amp; CIPC Registration Hub
                       </h1>
-                      <p className="text-xs sm:text-sm text-slate-300 max-w-2xl">
+                      <p className="text-xs sm:text-sm text-slate-200 max-w-2xl">
                         Choose the right legal entity structure and follow the 6-step CIPC BizPortal registration process (R175 standard fee).
                       </p>
                     </div>
@@ -327,7 +398,7 @@ export default function App() {
                       href="https://www.bizportal.gov.za/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#D4AF37] hover:bg-[#e3be42] text-[#0F172A] text-xs font-extrabold rounded-xl shadow-xs transition-colors shrink-0 self-start md:self-auto"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#EAB308] hover:bg-[#facc15] text-[#070B28] text-xs font-extrabold rounded-xl shadow-xs transition-colors shrink-0 self-start md:self-auto"
                     >
                       <span>Open Official BizPortal.gov.za</span>
                       <ExternalLink className="w-3.5 h-3.5" />
@@ -339,24 +410,24 @@ export default function App() {
                 <CipcProcessSection />
 
                 {/* Bottom Next Step CTA Card */}
-                <div className="bg-[#0F172A] text-white py-10 border-t border-slate-800 no-print">
+                <div className="bg-[#070B28] text-white py-10 border-t-2 border-[#15806B] no-print">
                   <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="p-6 sm:p-8 rounded-2xl bg-[#1E1E24] border border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                    <div className="p-6 sm:p-8 rounded-2xl bg-[#0D133D] border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                       <div className="space-y-1">
-                        <span className="text-xs font-bold uppercase tracking-wider text-[#D4AF37]">
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#EAB308]">
                           Completed Company Registration?
                         </span>
                         <h3 className="text-lg sm:text-xl font-extrabold text-white">
                           Next Step: Tax &amp; B-BBEE Compliance
                         </h3>
-                        <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
+                        <p className="text-xs sm:text-sm text-slate-200 max-w-xl">
                           Calculate your Small Business Corporation (SBC) tax savings, check industry hustle licences, and download your free Sworn B-BBEE EME Affidavit.
                         </p>
                       </div>
                       <button
                         type="button"
                         onClick={() => setActiveTab('compliance')}
-                        className="inline-flex items-center gap-2 px-5 py-3 bg-[#D4AF37] hover:bg-[#e3be42] text-[#0F172A] text-xs font-extrabold rounded-xl shadow-xs transition-colors shrink-0 cursor-pointer"
+                        className="inline-flex items-center gap-2 px-5 py-3 bg-[#EAB308] hover:bg-[#facc15] text-[#070B28] text-xs font-extrabold rounded-xl shadow-xs transition-colors shrink-0 cursor-pointer"
                       >
                         <span>Next Step: Tax &amp; B-BBEE</span>
                         <ArrowRight className="w-4 h-4" />
@@ -371,17 +442,17 @@ export default function App() {
             {activeTab === 'compliance' && (
               <div>
                 {/* Module Banner */}
-                <div className="bg-[#0F172A] text-white py-8 sm:py-10 border-b border-slate-800 no-print">
+                <div className="bg-[#070B28] text-white py-8 sm:py-10 border-b-2 border-[#15806B] no-print">
                   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="space-y-1">
-                      <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#D4AF37]">
+                      <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#EAB308]">
                         <ShieldCheck className="w-4 h-4" />
                         <span>Module 02 · Statutory &amp; Sector Compliance</span>
                       </div>
                       <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
                         SARS Tax, Industry Licences &amp; B-BBEE Hub
                       </h1>
-                      <p className="text-xs sm:text-sm text-slate-300 max-w-2xl">
+                      <p className="text-xs sm:text-sm text-slate-200 max-w-2xl">
                         Stay compliant with SARS eFiling, verify mandatory sector permits, and generate your B-BBEE Exempted Micro Enterprise (EME) sworn affidavit.
                       </p>
                     </div>
@@ -389,7 +460,7 @@ export default function App() {
                       href="https://www.cipc.co.za/wp-content/uploads/2023/01/Affidavit-EME-Gen.pdf"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#D4AF37] hover:bg-[#e3be42] text-[#0F172A] text-xs font-extrabold rounded-xl shadow-xs transition-colors shrink-0 self-start md:self-auto"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#EAB308] hover:bg-[#facc15] text-[#070B28] text-xs font-extrabold rounded-xl shadow-xs transition-colors shrink-0 self-start md:self-auto"
                     >
                       <span>Download Official CIPC B-BBEE PDF</span>
                       <ExternalLink className="w-3.5 h-3.5" />
@@ -401,24 +472,24 @@ export default function App() {
                 <BbeeAffidavitGenerator />
 
                 {/* Bottom Next Step CTA Card */}
-                <div className="bg-[#0F172A] text-white py-10 border-t border-slate-800 no-print">
+                <div className="bg-[#070B28] text-white py-10 border-t-2 border-[#15806B] no-print">
                   <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="p-6 sm:p-8 rounded-2xl bg-[#1E1E24] border border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                    <div className="p-6 sm:p-8 rounded-2xl bg-[#0D133D] border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                       <div className="space-y-1">
-                        <span className="text-xs font-bold uppercase tracking-wider text-[#D4AF37]">
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#EAB308]">
                           Tax PIN &amp; B-BBEE Affidavit Ready?
                         </span>
                         <h3 className="text-lg sm:text-xl font-extrabold text-white">
                           Next Step: Funding &amp; Grants
                         </h3>
-                        <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
+                        <p className="text-xs sm:text-sm text-slate-200 max-w-xl">
                           Audit your compliance dossier in 60 seconds and unlock NYDA youth grants, merged SEDFA funds, IDC industrial financing, and SETA stipends.
                         </p>
                       </div>
                       <button
                         type="button"
                         onClick={() => setActiveTab('funding')}
-                        className="inline-flex items-center gap-2 px-5 py-3 bg-[#D4AF37] hover:bg-[#e3be42] text-[#0F172A] text-xs font-extrabold rounded-xl shadow-xs transition-colors shrink-0 cursor-pointer"
+                        className="inline-flex items-center gap-2 px-5 py-3 bg-[#EAB308] hover:bg-[#facc15] text-[#070B28] text-xs font-extrabold rounded-xl shadow-xs transition-colors shrink-0 cursor-pointer"
                       >
                         <span>Next Step: Funding &amp; Grants</span>
                         <ArrowRight className="w-4 h-4" />
@@ -433,17 +504,17 @@ export default function App() {
             {activeTab === 'funding' && (
               <div>
                 {/* Module Banner */}
-                <div className="bg-[#0F172A] text-white py-8 sm:py-10 border-b border-slate-800 no-print">
+                <div className="bg-[#070B28] text-white py-8 sm:py-10 border-b-2 border-[#15806B] no-print">
                   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="space-y-1">
-                      <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#D4AF37]">
+                      <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#EAB308]">
                         <Coins className="w-4 h-4" />
                         <span>Module 03 · Capital Readiness &amp; Grant Directory</span>
                       </div>
                       <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
                         Funding Readiness Audit &amp; Grants Directory
                       </h1>
-                      <p className="text-xs sm:text-sm text-slate-300 max-w-2xl">
+                      <p className="text-xs sm:text-sm text-slate-200 max-w-2xl">
                         Verify your mandatory compliance documents first, then apply directly to verified South African development finance institutions and incubators.
                       </p>
                     </div>
@@ -454,24 +525,24 @@ export default function App() {
                 <FundingDirectorySection searchQuery={searchQuery} />
 
                 {/* Bottom Next Step CTA Card */}
-                <div className="bg-[#0F172A] text-white py-10 border-t border-slate-800 no-print">
+                <div className="bg-[#070B28] text-white py-10 border-t-2 border-[#15806B] no-print">
                   <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="p-6 sm:p-8 rounded-2xl bg-[#1E1E24] border border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                    <div className="p-6 sm:p-8 rounded-2xl bg-[#0D133D] border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                       <div className="space-y-1">
-                        <span className="text-xs font-bold uppercase tracking-wider text-[#D4AF37]">
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#EAB308]">
                           Preparing Your Grant or Bank Application?
                         </span>
                         <h3 className="text-lg sm:text-xl font-extrabold text-white">
                           Next Step: Templates &amp; Guides
                         </h3>
-                        <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
+                        <p className="text-xs sm:text-sm text-slate-200 max-w-xl">
                           Use our bankable 6-chapter Sample Business Plan (with 3-year P&amp;L and 12-month cash flows), Company Profile Guide, and Official Portal Directory.
                         </p>
                       </div>
                       <button
                         type="button"
                         onClick={() => setActiveTab('toolkits')}
-                        className="inline-flex items-center gap-2 px-5 py-3 bg-[#D4AF37] hover:bg-[#e3be42] text-[#0F172A] text-xs font-extrabold rounded-xl shadow-xs transition-colors shrink-0 cursor-pointer"
+                        className="inline-flex items-center gap-2 px-5 py-3 bg-[#EAB308] hover:bg-[#facc15] text-[#070B28] text-xs font-extrabold rounded-xl shadow-xs transition-colors shrink-0 cursor-pointer"
                       >
                         <span>Next Step: Templates &amp; Guides</span>
                         <ArrowRight className="w-4 h-4" />
@@ -486,17 +557,17 @@ export default function App() {
             {activeTab === 'toolkits' && (
               <div>
                 {/* Module Banner + 3 Sub-Tab Pill Switcher */}
-                <div className="bg-[#0F172A] text-white py-8 sm:py-10 border-b border-slate-800 no-print">
+                <div className="bg-[#070B28] text-white py-8 sm:py-10 border-b-2 border-[#15806B] no-print">
                   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
                     <div className="space-y-1">
-                      <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#D4AF37]">
+                      <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#EAB308]">
                         <FolderKanban className="w-4 h-4" />
                         <span>Module 04 · Printable Blueprints &amp; Official Portals</span>
                       </div>
                       <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
                         Templates, Financial Models &amp; Official Links
                       </h1>
-                      <p className="text-xs sm:text-sm text-slate-300 max-w-2xl">
+                      <p className="text-xs sm:text-sm text-slate-200 max-w-2xl">
                         Select a resource below. Clicking &ldquo;Print / Save PDF&rdquo; exports only the currently open template cleanly onto A4 pages.
                       </p>
                     </div>
@@ -510,8 +581,8 @@ export default function App() {
                         onClick={() => setToolkitSubTab('plan')}
                         className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
                           toolkitSubTab === 'plan'
-                            ? 'bg-[#D4AF37] text-[#0F172A] shadow-sm'
-                            : 'bg-[#1E1E24] text-slate-300 hover:text-white border border-slate-700'
+                            ? 'bg-[#EAB308] text-[#070B28] shadow-sm'
+                            : 'bg-[#0D133D] text-slate-200 hover:text-white border border-slate-800'
                         }`}
                       >
                         <FileText className="w-4 h-4" />
@@ -525,8 +596,8 @@ export default function App() {
                         onClick={() => setToolkitSubTab('profile')}
                         className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
                           toolkitSubTab === 'profile'
-                            ? 'bg-[#D4AF37] text-[#0F172A] shadow-sm'
-                            : 'bg-[#1E1E24] text-slate-300 hover:text-white border border-slate-700'
+                            ? 'bg-[#EAB308] text-[#070B28] shadow-sm'
+                            : 'bg-[#0D133D] text-slate-200 hover:text-white border border-slate-800'
                         }`}
                       >
                         <Briefcase className="w-4 h-4" />
@@ -540,8 +611,8 @@ export default function App() {
                         onClick={() => setToolkitSubTab('links')}
                         className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
                           toolkitSubTab === 'links'
-                            ? 'bg-[#D4AF37] text-[#0F172A] shadow-sm'
-                            : 'bg-[#1E1E24] text-slate-300 hover:text-white border border-slate-700'
+                            ? 'bg-[#EAB308] text-[#070B28] shadow-sm'
+                            : 'bg-[#0D133D] text-slate-200 hover:text-white border border-slate-800'
                         }`}
                       >
                         <ExternalLink className="w-4 h-4" />
@@ -558,7 +629,17 @@ export default function App() {
               </div>
             )}
 
-            {/* VIEW 6: PRIVACY POLICY PAGE */}
+            {/* VIEW 6: VERIFIED SA BUSINESS DIRECTORY */}
+            {activeTab === 'directory' && (
+              <BusinessDirectorySection />
+            )}
+
+            {/* VIEW 7: VERIFIED VACANCIES & CONTRACTS BOARD */}
+            {activeTab === 'vacancies' && (
+              <VerifiedVacanciesTab focusedVacancyId={focusedVacancyId} />
+            )}
+
+            {/* VIEW 8: PRIVACY POLICY PAGE */}
             {activeTab === 'privacy' && (
               <PrivacyPolicyPage onNavigateHome={() => setActiveTab('home')} />
             )}
@@ -573,7 +654,7 @@ export default function App() {
           <button
             onClick={scrollToTop}
             aria-label="Back to Top"
-            className="fixed bottom-20 md:bottom-6 right-5 z-40 p-3 bg-[#D4AF37] hover:bg-[#e3be42] text-[#0F172A] rounded-full shadow-lg transition-all duration-200 active:scale-95 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#D4AF37] flex items-center justify-center border border-[#0F172A]/20 no-print"
+            className="fixed bottom-20 md:bottom-6 right-5 z-40 p-3 bg-[#EAB308] hover:bg-[#facc15] text-[#070B28] rounded-full shadow-lg transition-all duration-200 active:scale-95 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#EAB308] flex items-center justify-center border border-[#070B28]/20 no-print"
           >
             <ArrowUp className="w-5 h-5 stroke-[2.5]" />
           </button>

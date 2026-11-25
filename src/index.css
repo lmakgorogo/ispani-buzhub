@@ -3,6 +3,15 @@
 
 :root {
   font-family: 'DM Sans', sans-serif;
+  --brand-navy: #070B28;
+  --brand-indigo: #0D133D;
+  --brand-gold: #EAB308;
+  --brand-emerald: #15806B;
+  --brand-surface: #FFFFFF;
+  --brand-surface-alt: #F8FAFC;
+  --brand-text: #1E293B;
+  color: #1E293B;
+  background-color: #FFFFFF;
 }
 
 h1, h2, h3, h4, .font-display {
